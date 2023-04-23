@@ -257,6 +257,18 @@
   resolved "https://registry.yarnpkg.com/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.4.15.tgz#d7c6e6755c78567a951e04ab52ef0fd26de59f32"
   integrity sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==
 
+"@malib/create-gear@^0.5.5":
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/@malib/create-gear/-/create-gear-0.5.5.tgz#f932838e71bbc8ce897fb7893dcdd3b23c5dfff1"
+  integrity sha512-5p9vJ9eqhixQFY5bAFxoNDpqPkS1hjS2NdHbbhe7Z9YP91qESXWEY1aJ/Bil/8GxB6bx0N6i4ZVbBovqsuMcig==
+  dependencies:
+    "@malib/gear" "^0.11.0"
+
+"@malib/gear@^0.11.0":
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/@malib/gear/-/gear-0.11.0.tgz#ca93edf2ef6ed0aa63de9c52ba9a9a9ac3534c7c"
+  integrity sha512-w+F4baqCar37lbnhtC7LcHOtasZUPNdNQmmPR75Du1s6UkoyqNvHpPSZrDVeGvOSlwdyiQC8cRXYZzRa8nkgbQ==
+
 "@miniflare/cache@2.13.0":
   version "2.13.0"
   resolved "https://registry.yarnpkg.com/@miniflare/cache/-/cache-2.13.0.tgz#896424c1c6c3cdba2ec8641b68d7424cfa556dca"

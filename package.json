@@ -12,5 +12,9 @@
     "start": "wrangler dev",
     "deploy": "wrangler publish",
     "test": "vitest"
+  },
+  "dependencies": {
+    "@malib/create-gear": "^0.5.5",
+    "@malib/gear": "^0.11.0"
   }
 }
