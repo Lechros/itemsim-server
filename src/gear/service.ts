@@ -1,23 +1,24 @@
 import { createGearFromNode, createPotentialFromCode } from '@malib/create-gear';
 import { gearToPlain } from '@malib/gear';
-import { StatusError } from 'itty-router';
-import { GearDto, GearEntity, GearIconOrigin } from './gear';
+import { StatusError, json, png } from 'itty-router';
+import { cache } from '../middlewares/cache';
+import { GearDto, GearEntity } from './gear';
 import * as gearRepository from './repository';
 
-function search(query: string): GearDto[] {
+function search(query: string) {
   query = query.trim();
   if (query.length === 0) {
-    return [];
+    return json([]);
   }
-  return gearRepository.findByName(query).map(toDto);
+  return json(gearRepository.findByName(query).map(toDto));
 }
 
-function get(id: number): GearDto {
+function get(id: number) {
   const result = gearRepository.findById(id);
   if (!result) {
     throw new StatusError(404);
   }
-  return toDto(result);
+  return json(toDto(result));
 }
 
 async function getIcon(id: number, bucket: R2Bucket) {
@@ -25,15 +26,17 @@ async function getIcon(id: number, bucket: R2Bucket) {
   if (icon === null) {
     throw new StatusError(404);
   }
-  return icon.body;
+  const res = cache(png(icon.body), { maxAge: 86400, cachePublic: true });
+  res.headers.set('Etag', icon.etag);
+  return res;
 }
 
-function getOrigin(id: number): GearIconOrigin {
+function getOrigin(id: number) {
   const result = gearRepository.findById(id);
   if (!result) {
     throw new StatusError(404);
   }
-  return result.origin;
+  return json(result.origin);
 }
 
 function toDto(entity: GearEntity): GearDto {
