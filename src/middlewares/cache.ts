@@ -5,9 +5,9 @@ export interface CacheOption {
 
 export function cache(response: Response, options?: CacheOption): Response {
   const { maxAge, cachePublic } = { maxAge: 86400, ...options };
-  const value = [`max-age=${maxAge}`];
+  let value = [`max-age=${maxAge}`];
   if (cachePublic !== undefined) {
-    value.push(getHttpPublic(cachePublic));
+    value = [getHttpPublic(cachePublic), ...value];
   }
 
   response.headers.set('Cache-Control', value.join(', '));
