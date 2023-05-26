@@ -1,13 +1,13 @@
-import itemOrigin from '../data/item-origin.json';
+import itemRawOrigin from '../data/item-raw-origin.json';
 import { ItemIconOrigin } from './item';
 
-const db = itemOrigin as { [id: number]: (typeof itemOrigin)[keyof typeof itemOrigin] };
+const rawOriginDb = itemRawOrigin as { [id: number]: (typeof itemRawOrigin)[keyof typeof itemRawOrigin] };
 
-function findById(id: number): ItemIconOrigin | undefined {
-  if (!db.hasOwnProperty(id)) {
+function findRawOriginById(id: number): ItemIconOrigin | undefined {
+  if (!rawOriginDb.hasOwnProperty(id)) {
     return undefined;
   }
-  return db[id] as [number, number];
+  return rawOriginDb[id] as ItemIconOrigin;
 }
 
-export { findById };
+export { findRawOriginById };

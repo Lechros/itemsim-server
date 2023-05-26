@@ -1,7 +1,13 @@
 import { gearJson } from '@malib/create-gear';
-import { GearEntity } from './gear';
+import gearOrigin from '../data/gear-origin.json';
+import gearRawOrigin from '../data/gear-raw-origin.json';
+import { GearEntity, GearIconOrigin } from './gear';
 
 const db = Object.entries(gearJson);
+
+const originDb = gearOrigin as { [id: number]: (typeof gearOrigin)[keyof typeof gearOrigin] };
+
+const rawOriginDb = gearRawOrigin as { [id: number]: (typeof gearRawOrigin)[keyof typeof gearRawOrigin] };
 
 function findById(id: number): GearEntity | undefined {
   if (!gearJson.hasOwnProperty(id)) {
@@ -15,6 +21,20 @@ function findByName(keyword: string): GearEntity[] {
     .filter((e) => match(e[1].name, keyword))
     .sort((a, b) => compare(a[1].name, b[1].name, keyword))
     .map((g) => ({ ...g[1], id: Number(g[0]) }));
+}
+
+function findOriginById(id: number): GearIconOrigin | undefined {
+  if (!originDb.hasOwnProperty(id)) {
+    return undefined;
+  }
+  return originDb[id] as GearIconOrigin;
+}
+
+function findRawOriginById(id: number): GearIconOrigin | undefined {
+  if (!rawOriginDb.hasOwnProperty(id)) {
+    return undefined;
+  }
+  return rawOriginDb[id] as GearIconOrigin;
 }
 
 function match(name: string, keyword: string) {
@@ -49,4 +69,4 @@ function compare(name1: string, name2: string, keyword: string) {
   return 0;
 }
 
-export { findById, findByName };
+export { findById, findByName, findOriginById, findRawOriginById };

@@ -1,7 +1,7 @@
 import { createGearFromNode, createPotentialFromCode } from '@malib/create-gear';
 import { gearToPlain } from '@malib/gear';
 import { StatusError, json, png } from 'itty-router';
-import { cache } from '../middlewares/cache';
+import { etag } from '../middlewares/cache';
 import { GearDto, GearEntity } from './gear';
 import * as gearRepository from './repository';
 
@@ -14,29 +14,44 @@ function search(query: string) {
 }
 
 function get(id: number) {
-  const result = gearRepository.findById(id);
-  if (!result) {
+  const gear = gearRepository.findById(id);
+  if (!gear) {
     throw new StatusError(404);
   }
-  return json(toDto(result));
+  return json(toDto(gear));
 }
 
 async function getIcon(id: number, bucket: R2Bucket) {
-  const icon = await bucket.get(`gear/${id}.png`);
+  const icon = await bucket.get(`gears/icon/${id}.png`);
+  if (icon === null) {
+    console.log('Cannot find icon ' + id);
+    throw new StatusError(404);
+  }
+  return etag(png(icon.body), icon.etag);
+}
+
+function getIconOrigin(id: number) {
+  const origin = gearRepository.findOriginById(id);
+  if (!origin) {
+    throw new StatusError(404);
+  }
+  return json(origin);
+}
+
+async function getIconRaw(id: number, bucket: R2Bucket) {
+  const icon = await bucket.get(`gears/iconRaw/${id}.png`);
   if (icon === null) {
     throw new StatusError(404);
   }
-  const res = cache(png(icon.body), { maxAge: 86400, cachePublic: true });
-  res.headers.set('Etag', icon.etag);
-  return res;
+  return etag(png(icon.body), icon.etag);
 }
 
-function getOrigin(id: number) {
-  const result = gearRepository.findById(id);
-  if (!result) {
+function getIconRawOrigin(id: number) {
+  const origin = gearRepository.findRawOriginById(id);
+  if (!origin) {
     throw new StatusError(404);
   }
-  return json(result.origin);
+  return json(origin);
 }
 
 function toDto(entity: GearEntity): GearDto {
@@ -44,4 +59,4 @@ function toDto(entity: GearEntity): GearDto {
   return gearToPlain(gear);
 }
 
-export { search, get, getIcon, getOrigin };
+export { search, get, getIcon, getIconOrigin, getIconRaw, getIconRawOrigin };

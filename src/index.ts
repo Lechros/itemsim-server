@@ -1,4 +1,5 @@
 import { error, json } from 'itty-router';
+import { cacheOk } from './middlewares/cache';
 import { corsify } from './middlewares/cors';
 import router from './router';
 
@@ -7,16 +8,16 @@ export default {
     const cacheUrl = new URL(request.url);
 
     const cacheKey = new Request(cacheUrl.toString(), request);
-    const cache = caches.default;
+    const cfCache = caches.default;
 
-    let response = await cache.match(cacheKey);
+    let response = await cfCache.match(cacheKey);
 
     if (!response) {
-      response = await router.handle(request, env, ctx).then(json).catch(error).then(corsify);
+      response = await router.handle(request, env, ctx).then(json).then(cacheOk).catch(error).then(corsify);
 
       response = new Response(response!.body, response);
 
-      ctx.waitUntil(cache.put(cacheKey, response.clone()));
+      ctx.waitUntil(cfCache.put(cacheKey, response.clone()));
     }
 
     return response;

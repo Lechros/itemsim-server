@@ -1,26 +1,23 @@
-import { IRequest, Router, error, json, png } from 'itty-router';
+import { IRequest, Router, error } from 'itty-router';
 import { withId } from '../middlewares/id';
 import { CF } from '../types';
 import * as gearService from './service';
 
 const router = Router<IRequest, CF>({ base: '/items' })
-  .get<IRequest, CF>('/:id/icon', withId, async (req, env) => {
+  .get<IRequest, CF>('/:id/iconRaw', withId, (req, env, ctx) => {
     const { id } = req;
     if (id === undefined) {
       return error(404);
     }
     const bucket = env.MY_BUCKET;
-    if (!bucket) {
-      return error(500);
-    }
-    return png(await gearService.getIcon(id, bucket));
+    return gearService.getIconRaw(id, bucket);
   })
-  .get('/:id/origin', withId, (req) => {
+  .get('/:id/iconRaw/origin', withId, (req) => {
     const { id } = req;
     if (id === undefined) {
       return error(404);
     }
-    return json(gearService.getOrigin(id));
+    return gearService.getIconRawOrigin(id);
   });
 
 export default router;

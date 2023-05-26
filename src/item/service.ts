@@ -1,21 +1,21 @@
-import { StatusError } from 'itty-router';
-import { ItemIconOrigin } from './item';
+import { StatusError, json, png } from 'itty-router';
+import { etag } from '../middlewares/cache';
 import * as itemRepository from './repository';
 
-async function getIcon(id: number, bucket: R2Bucket) {
-  const icon = await bucket.get(`item/${id}.png`);
+async function getIconRaw(id: number, bucket: R2Bucket) {
+  const icon = await bucket.get(`items/iconRaw/${id}.png`);
   if (icon === null) {
     throw new StatusError(404);
   }
-  return icon.body;
+  return etag(png(icon.body), icon.etag);
 }
 
-function getOrigin(id: number): ItemIconOrigin {
-  const result = itemRepository.findById(id);
-  if (!result) {
+function getIconRawOrigin(id: number) {
+  const origin = itemRepository.findRawOriginById(id);
+  if (!origin) {
     throw new StatusError(404);
   }
-  return result;
+  return json(origin);
 }
 
-export { getIcon, getOrigin };
+export { getIconRaw, getIconRawOrigin };
