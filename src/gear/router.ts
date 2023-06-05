@@ -1,4 +1,4 @@
-import { IRequest, Router, error } from 'itty-router';
+import { IRequest, Router, error, withContent } from 'itty-router';
 import { withId } from '../middlewares/id';
 import { CF } from '../types';
 import * as gearService from './service';
@@ -47,6 +47,10 @@ const router = Router<IRequest, CF>({ base: '/gears' })
       return error(404);
     }
     return gearService.getIconOrigin(id);
+  })
+  .post('/migrate', withContent, (req) => {
+    const { content } = req;
+    return gearService.getMigratedGear(content);
   });
 
 export default router;

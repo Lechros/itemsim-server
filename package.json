@@ -13,7 +13,7 @@
     "wrangler": "^3.0.0"
   },
   "dependencies": {
-    "@malib/create-gear": "^0.6.0",
-    "@malib/gear": "^0.13.0"
+    "@malib/create-gear": "^0.6.1",
+    "@malib/gear": "^0.14.0"
   }
 }

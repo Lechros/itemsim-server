@@ -1,5 +1,5 @@
-import { createGearFromNode, createPotentialFromCode } from '@malib/create-gear';
-import { gearToPlain } from '@malib/gear';
+import { createGearFromId, createGearFromNode, createPotentialFromCode } from '@malib/create-gear';
+import { Gear, GearPropType, gearToPlain, isGearLike, migrate, plainToGear, validateParseGear } from '@malib/gear';
 import { StatusError, json, png } from 'itty-router';
 import { etag } from '../middlewares/cache';
 import { GearDto, GearEntity } from './gear';
@@ -24,7 +24,6 @@ function get(id: number) {
 async function getIcon(id: number, bucket: R2Bucket) {
   const icon = await bucket.get(`gears/icon/${id}.png`);
   if (icon === null) {
-    console.log('Cannot find icon ' + id);
     throw new StatusError(404);
   }
   return etag(png(icon.body), icon.etag);
@@ -54,9 +53,22 @@ function getIconRawOrigin(id: number) {
   return json(origin);
 }
 
+function getMigratedGear(content: unknown) {
+  if (!isGearLike(content)) {
+    throw new StatusError(400);
+  }
+  const gear = plainToGear(content);
+  const newGear = createGearFromId(gear.itemID)!;
+  migrate(gear, newGear, {
+    ignorePropTypes: [GearPropType.equipTradeBlock],
+    getPotentialFunc: createPotentialFromCode,
+  });
+  return gearToPlain(newGear);
+}
+
 function toDto(entity: GearEntity): GearDto {
   const gear = createGearFromNode(entity, entity.id, createPotentialFromCode);
   return gearToPlain(gear);
 }
 
-export { search, get, getIcon, getIconOrigin, getIconRaw, getIconRawOrigin };
+export { search, get, getIcon, getIconOrigin, getIconRaw, getIconRawOrigin, getMigratedGear };
