@@ -47,10 +47,10 @@ const router = Router<IRequest, CF>({ base: '/gears' })
       return error(404);
     }
     return gearService.getIconOrigin(id);
-  })
-  .post('/migrate', withContent, (req) => {
-    const { content } = req;
-    return gearService.getMigratedGear(content);
   });
+// .post('/migrate', withContent, (req) => {
+//   const { content } = req;
+//   return gearService.getMigratedGear(content);
+// });
 
 export default router;

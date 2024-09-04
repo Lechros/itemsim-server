@@ -1,26 +1,27 @@
-import { gearJson } from '@malib/create-gear';
+import { Gear, GearDataMap, GearRepository, PotentialRepository } from '@malib/gear';
 import gearOrigin from '../data/gear-origin.json';
 import gearRawOrigin from '../data/gear-raw-origin.json';
-import { GearEntity, GearIconOrigin } from './gear';
+import gears from '../data/gear.json';
+import itemOptions from '../data/item-option.json';
+import { GearIconOrigin } from './data';
 
-const db = Object.entries(gearJson);
+const db = gears as GearDataMap;
 
 const originDb = gearOrigin as { [id: number]: (typeof gearOrigin)[keyof typeof gearOrigin] };
 
 const rawOriginDb = gearRawOrigin as { [id: number]: (typeof gearRawOrigin)[keyof typeof gearRawOrigin] };
 
-function findById(id: number): GearEntity | undefined {
-  if (!gearJson.hasOwnProperty(id)) {
-    return undefined;
-  }
-  return { ...gearJson[id], id };
+const gearRepository = new GearRepository(gears, new PotentialRepository(itemOptions));
+
+function findById(id: number): Gear | undefined {
+  return gearRepository.createGearFromId(id);
 }
 
-function findByName(keyword: string): GearEntity[] {
-  return db
-    .filter((e) => match(e[1].name, keyword))
-    .sort((a, b) => compare(a[1].name, b[1].name, keyword))
-    .map((g) => ({ ...g[1], id: Number(g[0]) }));
+function findByName(keyword: string): Gear[] {
+  return Object.entries(db)
+    .filter(([, data]) => match(data.name, keyword))
+    .sort(([, d1], [, d2]) => compare(d1.name, d2.name, keyword))
+    .map(([id]) => gearRepository.createGearFromId(Number(id)) as Gear);
 }
 
 function findOriginById(id: number): GearIconOrigin | undefined {

@@ -1,8 +1,7 @@
-import { createGearFromId, createGearFromNode, createPotentialFromCode } from '@malib/create-gear';
-import { Gear, GearPropType, gearToPlain, isGearLike, migrate, plainToGear, validateParseGear } from '@malib/gear';
+import { Gear, gearToPlain } from '@malib/gear';
 import { StatusError, json, png } from 'itty-router';
 import { etag } from '../middlewares/cache';
-import { GearDto, GearEntity } from './gear';
+import { GearRes } from './data';
 import * as gearRepository from './repository';
 
 function search(query: string) {
@@ -10,7 +9,7 @@ function search(query: string) {
   if (query.length === 0) {
     return json([]);
   }
-  return json(gearRepository.findByName(query).map(toDto));
+  return json(gearRepository.findByName(query).map(toGearRes));
 }
 
 function get(id: number) {
@@ -18,7 +17,7 @@ function get(id: number) {
   if (!gear) {
     throw new StatusError(404);
   }
-  return json(toDto(gear));
+  return json(toGearRes(gear));
 }
 
 async function getIcon(id: number, bucket: R2Bucket) {
@@ -53,22 +52,21 @@ function getIconRawOrigin(id: number) {
   return json(origin);
 }
 
-function getMigratedGear(content: unknown) {
-  if (!isGearLike(content)) {
-    throw new StatusError(400);
-  }
-  const gear = plainToGear(content);
-  const newGear = createGearFromId(gear.itemID)!;
-  migrate(gear, newGear, {
-    ignorePropTypes: [GearPropType.equipTradeBlock],
-    getPotentialFunc: createPotentialFromCode,
-  });
-  return gearToPlain(newGear);
-}
+// function getMigratedGear(content: unknown) {
+//   if (!isGearLike(content)) {
+//     throw new StatusError(400);
+//   }
+//   const gear = plainToGear(content);
+//   const newGear = gearRepository.findById(gear.itemID)!;
+//   migrate(gear, newGear, {
+//     ignorePropTypes: [GearPropType.equipTradeBlock],
+//     getPotentialFunc: createPotentialFromCode,
+//   });
+//   return gearToPlain(newGear);
+// }
 
-function toDto(entity: GearEntity): GearDto {
-  const gear = createGearFromNode(entity, entity.id, createPotentialFromCode);
+function toGearRes(gear: Gear): GearRes {
   return gearToPlain(gear);
 }
 
-export { search, get, getIcon, getIconOrigin, getIconRaw, getIconRawOrigin, getMigratedGear };
+export { get, getIcon, getIconOrigin, getIconRaw, getIconRawOrigin, search };
