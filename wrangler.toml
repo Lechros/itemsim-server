@@ -2,7 +2,6 @@ name = "server"
 main = "src/index.ts"
 compatibility_date = "2023-05-23"
 
-[[r2_buckets]]
-binding = "MY_BUCKET"
-bucket_name = "itemsim-icon"
-preview_bucket_name = "itemsim-icon-dev"
+[observability]
+enabled = true
+head_sampling_rate = 1
