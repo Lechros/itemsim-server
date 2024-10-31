@@ -1,8 +1,9 @@
-import { Gear, GearDataMap, GearRepository, PotentialRepository } from '@malib/gear';
+import { Gear, GearData, GearDataMap, GearRepository, PotentialRepository } from '@malib/gear';
 import gearOrigin from '../data/gear-origin.json';
 import gearRawOrigin from '../data/gear-raw-origin.json';
 import gears from '../data/gear.json';
 import itemOptions from '../data/item-option.json';
+import { InvertedIndex } from '../InvertedIndex';
 import { GearIconOrigin } from './data';
 
 const db = gears as GearDataMap;
@@ -13,13 +14,20 @@ const rawOriginDb = gearRawOrigin as { [id: number]: (typeof gearRawOrigin)[keyo
 
 const gearRepository = new GearRepository(gears, new PotentialRepository(itemOptions));
 
+const gearIndex = new InvertedIndex<[string, GearData]>();
+
+Object.entries(db).forEach((item) => {
+  gearIndex.add(item, item[1].name);
+});
+
 function findById(id: number): Gear | undefined {
   return gearRepository.createGearFromId(id);
 }
 
 function findByName(keyword: string): Gear[] {
-  return Object.entries(db)
-    .filter(([, data]) => match(data.name, keyword))
+  return gearIndex
+    .get(keyword)
+    .filter((item) => match(item[1].name, keyword))
     .sort(([, d1], [, d2]) => compare(d1.name, d2.name, keyword))
     .map(([id]) => gearRepository.createGearFromId(Number(id)) as Gear);
 }

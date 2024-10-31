@@ -1,6 +1,5 @@
 import { Gear, gearToPlain } from '@malib/gear';
 import { StatusError, json, png } from 'itty-router';
-import { etag } from '../middlewares/cache';
 import { GearRes } from './data';
 import * as gearRepository from './repository';
 
@@ -20,28 +19,12 @@ function get(id: number) {
   return json(toGearRes(gear));
 }
 
-async function getIcon(id: number, bucket: R2Bucket) {
-  const icon = await bucket.get(`gears/icon/${id}.png`);
-  if (icon === null) {
-    throw new StatusError(404);
-  }
-  return etag(png(icon.body), icon.etag);
-}
-
 function getIconOrigin(id: number) {
   const origin = gearRepository.findOriginById(id);
   if (!origin) {
     throw new StatusError(404);
   }
   return json(origin);
-}
-
-async function getIconRaw(id: number, bucket: R2Bucket) {
-  const icon = await bucket.get(`gears/iconRaw/${id}.png`);
-  if (icon === null) {
-    throw new StatusError(404);
-  }
-  return etag(png(icon.body), icon.etag);
 }
 
 function getIconRawOrigin(id: number) {
@@ -69,4 +52,4 @@ function toGearRes(gear: Gear): GearRes {
   return gearToPlain(gear);
 }
 
-export { get, getIcon, getIconOrigin, getIconRaw, getIconRawOrigin, search };
+export { get, getIconOrigin, getIconRawOrigin, search };
