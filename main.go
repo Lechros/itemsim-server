@@ -1,21 +1,43 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"itemsim-server/routes"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
 )
 
-//TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
-
 func main() {
-	//TIP <p>Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined text
-	// to see how GoLand suggests fixing the warning.</p><p>Alternatively, if available, click the lightbulb to view possible fixes.</p>
-	s := "gopher"
-	fmt.Printf("Hello and welcome, %s!\n", s)
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	// CORS
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"https://itemsim.com", "https://itemsim.pages.dev"},
+		AllowMethods: []string{http.MethodGet, http.MethodOptions},
+		MaxAge:       86400,
+	}))
 
-	for i := 1; i <= 5; i++ {
-		//TIP <p>To start your debugging session, right-click your code in the editor and select the Debug option.</p> <p>We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-		// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.</p>
-		fmt.Println("i =", 100/i)
+	routes.UseGearRoutes(e.Group("/gears"))
+	routes.UseItemRoutes(e.Group("/items"))
+
+	// Graceful Shutdown
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+	go func() {
+		if err := e.Start(":1323"); err != http.ErrServerClosed {
+			e.Logger.Fatal(err)
+		}
+	}()
+
+	<-ctx.Done()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := e.Shutdown(ctx); err != nil {
+		e.Logger.Fatal(err)
 	}
 }
