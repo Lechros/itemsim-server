@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"itemsim-server/internal/repository"
 	"net/http"
 )
 
@@ -13,12 +14,15 @@ func UseItemRoutes(group *echo.Group) {
 
 func gearItemRawIconById(c echo.Context) error {
 	id := c.Param("id")
-	// TODO
-	return c.Redirect(http.StatusPermanentRedirect, "item raw icon url with id "+id)
+	url := fmt.Sprintf("https://image.itemsim.com/origins/iconRaw/%d.png", id)
+	return c.Redirect(http.StatusPermanentRedirect, url)
 }
 
 func getItemRawIconOriginById(c echo.Context) error {
 	id := c.Param("id")
-	// TODO
-	return c.JSON(http.StatusOK, fmt.Sprintf("item raw icon origin with id %s", id))
+	origin, ok := repository.GetItemRawIconOriginById(id)
+	if !ok {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+	return c.JSON(http.StatusOK, origin)
 }

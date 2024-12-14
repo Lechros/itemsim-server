@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"itemsim-server/routes"
+	"itemsim-server/internal/routes"
 	"net/http"
 	"os"
 	"os/signal"
