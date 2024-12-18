@@ -9,12 +9,14 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 var gears map[string]json.RawMessage
 var names map[string]string
 var gearOrigins map[string][2]int
 var gearRawOrigins map[string][2]int
+var invertedIndex util.HangulInvertedIndex[string]
 
 func SearchGearByName(search string, size int) []json.RawMessage {
 	search = strings.ToLower(search)
@@ -24,11 +26,28 @@ func SearchGearByName(search string, size int) []json.RawMessage {
 	exactIds := make([]string, 0, 10)
 	regexIds := make([]string, 0, 10)
 
-	for id, name := range names {
-		if strings.Contains(name, search) {
-			exactIds = append(exactIds, id)
-		} else if len(exactIds) < size && regex.IsMatch(name) {
-			regexIds = append(regexIds, id)
+	useIndex := false
+	if utf8.RuneCountInString(search) > 1 {
+		foundIds := invertedIndex.FindAll(search)
+		if foundIds != nil {
+			useIndex = true
+			for _, id := range foundIds {
+				name := names[id]
+				if strings.Contains(name, search) {
+					exactIds = append(exactIds, id)
+				} else if len(exactIds) < size && regex.IsMatch(name) {
+					regexIds = append(regexIds, id)
+				}
+			}
+		}
+	}
+	if !useIndex {
+		for id, name := range names {
+			if strings.Contains(name, search) {
+				exactIds = append(exactIds, id)
+			} else if len(exactIds) < size && regex.IsMatch(name) {
+				regexIds = append(regexIds, id)
+			}
 		}
 	}
 
@@ -136,11 +155,15 @@ func init() {
 	util.ReadJson("resources/gear-raw-origin.json", &gearRawOrigins)
 
 	names = make(map[string]string)
+	invertedIndex = util.HangulInvertedIndex[string]{}
+	invertedIndex.Init()
 	for id, gearData := range gears {
 		var gear map[string]interface{}
 		if err := json.Unmarshal(gearData, &gear); err != nil {
 			log.Fatal(err)
 		}
-		names[id] = strings.ToLower(gear["name"].(string))
+		name := strings.ToLower(gear["name"].(string))
+		names[id] = name
+		invertedIndex.Add(id, name)
 	}
 }
