@@ -17,6 +17,7 @@ func TestSearchGearByName(t *testing.T) {
 		{args{"1"}, 214},
 		{args{"a"}, 18},
 		{args{"ㄱ"}, 2919},
+		{args{"ㄻ"}, 186},
 		{args{"ㅇ"}, 6995},
 		{args{"ㅇ ㅅ ㅇ"}, 170},
 		{args{"이"}, 3207},
@@ -36,7 +37,24 @@ func TestSearchGearByName(t *testing.T) {
 }
 
 func BenchmarkSearchGearByName(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		SearchGearByName("ㅇ", 9999)
+	searches := []string{
+		"a",
+		"ㅇ",
+		"ㅇ ㅅ ㅇ",
+		"이",
+		"마깃안",
+		"앱솔",
+		"젠",
+		"제네",
+		"에광",
+		"ㅇㅋㅇㅅㅇㄷ ㅇ",
+		"아케인셰이드 아처",
+	}
+	for _, search := range searches {
+		b.Run(search, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				SearchGearByName("ㅇ", 9999)
+			}
+		})
 	}
 }

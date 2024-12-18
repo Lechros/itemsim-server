@@ -2,10 +2,10 @@ package repository
 
 import (
 	"encoding/json"
+	"github.com/BurntSushi/rure-go"
 	"github.com/Lechros/hangul_regexp"
 	"itemsim-server/internal"
 	"log"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -19,7 +19,7 @@ var gearRawOrigins map[string][2]int
 func SearchGearByName(search string, size int) []json.RawMessage {
 	search = strings.ToLower(search)
 	pattern, _ := hangul_regexp.GetPattern(search, false, true, true)
-	regex := regexp.MustCompile("(?i)" + pattern) // (?i): Case insensitive
+	regex := rure.MustCompile("(?i)" + pattern) // (?i): Case insensitive
 
 	exactIds := make([]string, 0, 10)
 	regexIds := make([]string, 0, 10)
@@ -27,7 +27,7 @@ func SearchGearByName(search string, size int) []json.RawMessage {
 	for id, name := range names {
 		if strings.Contains(name, search) {
 			exactIds = append(exactIds, id)
-		} else if len(exactIds) < size && regex.MatchString(name) {
+		} else if len(exactIds) < size && regex.IsMatch(name) {
 			regexIds = append(regexIds, id)
 		}
 	}
@@ -104,7 +104,7 @@ func sortExactMatches(exactIds []string, search string) {
 	}
 }
 
-func sortRegexMatches(regexIds []string, regex *regexp.Regexp) {
+func sortRegexMatches(regexIds []string, regex *rure.Regex) {
 	type IdInfo struct {
 		intId int
 		index [2]int
@@ -113,8 +113,8 @@ func sortRegexMatches(regexIds []string, regex *regexp.Regexp) {
 	for i, id := range regexIds {
 		intId, _ := strconv.Atoi(id)
 		name := names[id]
-		index := [2]int(regex.FindStringIndex(name))
-		infos[i] = IdInfo{intId, index}
+		start, end, _ := regex.Find(name)
+		infos[i] = IdInfo{intId, [2]int{start, end}}
 	}
 	slices.SortFunc(infos, func(aInfo, bInfo IdInfo) int {
 		if aInfo.index[0] != bInfo.index[0] {
