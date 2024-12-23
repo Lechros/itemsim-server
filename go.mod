@@ -4,7 +4,7 @@ go 1.23.4
 
 require (
 	github.com/BurntSushi/rure-go v0.0.0-20231211185014-8a0f52724b91
-	github.com/Lechros/hangul_regexp v0.1.0
+	github.com/Lechros/hangul_regexp v0.2.0
 	github.com/labstack/echo/v4 v4.13.2
 )
 
