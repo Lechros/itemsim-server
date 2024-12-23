@@ -23,8 +23,11 @@ func search(c echo.Context) error {
 	if query == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "query is required")
 	}
-	gears := repository.SearchGearByName(query, 100)
-	return c.JSON(http.StatusOK, gears)
+	data, highlight := repository.SearchGearByName(query, 100)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"data":      data,
+		"highlight": highlight,
+	})
 }
 
 func getGearById(c echo.Context) error {

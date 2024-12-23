@@ -19,9 +19,9 @@ var concatNames string
 var concatIndex []int
 var concatIds []int
 
-func SearchGearByName(search string, size int) []json.RawMessage {
+func SearchGearByName(search string, size int) (data []json.RawMessage, highlight []string) {
 	search = strings.ToLower(search)
-	pattern, _ := hangul_regexp.GetPattern(search, false, true, true)
+	pattern, _ := hangul_regexp.GetPattern(search, false, true, true, false)
 	regex := rure.MustCompile("(?i)" + pattern) // (?i): Case insensitive
 
 	// Can't infer capacity from FindAll's length since single line can match multiple times.
@@ -45,15 +45,19 @@ func SearchGearByName(search string, size int) []json.RawMessage {
 
 	sortRegexMatches(matchedIds, regex)
 
+	capturingPattern, _ := hangul_regexp.GetPattern(search, false, true, true, true)
+	capturingRegex := rure.MustCompile("(?i)" + capturingPattern)
 	resultSize := min(len(matchedIds), size)
-	result := make([]json.RawMessage, resultSize)
+	data = make([]json.RawMessage, resultSize)
+	highlight = make([]string, resultSize)
 	for i, id := range matchedIds {
-		if len(result) == resultSize {
+		if i == resultSize {
 			break
 		}
-		result[i] = gears[id]
+		data[i] = gears[id]
+		highlight[i] = convertHighlight(names[id], capturingRegex)
 	}
-	return result
+	return data, highlight
 }
 
 func GetGearById(id string) (json.RawMessage, bool) {
@@ -106,6 +110,29 @@ func sortRegexMatches(ids []int, regex *rure.Regex) {
 	for i, info := range infos {
 		ids[i] = info.id
 	}
+}
+
+// Returns string where match rune is '1' and else is '0'
+func convertHighlight(name string, regex *rure.Regex) string {
+	captures := regex.NewCaptures()
+	regex.Captures(captures, name)
+	builder := strings.Builder{}
+	builder.Grow(len(name)) // Generous amount of buffer is faster than utf8.RuneCountInString, or reallocation
+
+	gi := 1
+	start, end, _ := captures.Group(gi)
+	for i := range name {
+		for gi < captures.Len() && i >= end {
+			gi++
+			start, end, _ = captures.Group(gi)
+		}
+		if i >= start && i < end {
+			builder.WriteRune('1')
+		} else {
+			builder.WriteRune('0')
+		}
+	}
+	return builder.String()
 }
 
 func init() {
