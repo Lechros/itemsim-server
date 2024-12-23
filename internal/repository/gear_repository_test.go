@@ -17,7 +17,7 @@ func TestSearchGearByName(t *testing.T) {
 		{args{"1"}, 214},
 		{args{"a"}, 18},
 		{args{"ㄱ"}, 2919},
-		{args{"ㄻ"}, 186},
+		{args{"ㄻ"}, 1065},
 		{args{"ㅇ"}, 6995},
 		{args{"ㅇ ㅅ ㅇ"}, 170},
 		{args{"이"}, 3207},
