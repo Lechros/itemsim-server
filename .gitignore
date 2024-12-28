@@ -17,6 +17,8 @@
 !resources/
 !resources/**
 
+!Dockerfile
+
 !README.md
 !LICENSE
 
