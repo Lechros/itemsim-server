@@ -20,12 +20,10 @@ COPY internal internal
 RUN go build -o app cmd/main.go
 
 # 3. Production image
-FROM ubuntu AS final
+FROM alpine AS final
 
-# add curl for healthcheck
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt \
-    apt-get update && apt-get install -y curl
+# gcompat: go bin compat, libgcc: rust regex, curl: healthcheck
+RUN apk add --no-cache gcompat libgcc curl
 
 # copy rure-go library
 COPY --from=rust-builder /app/regex/target/release/*.so /usr/lib
