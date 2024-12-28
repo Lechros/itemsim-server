@@ -14,6 +14,9 @@
 !go.sum
 !go.mod
 
+!resources/
+!resources/**
+
 !README.md
 !LICENSE
 
