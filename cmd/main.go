@@ -22,6 +22,9 @@ func main() {
 		MaxAge:       86400,
 	}))
 
+	e.GET("/health", func(c echo.Context) error {
+		return c.String(http.StatusOK, "OK")
+	})
 	routes.UseGearRoutes(e.Group("/gears"))
 	routes.UseItemRoutes(e.Group("/items"))
 
