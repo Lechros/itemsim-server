@@ -90,13 +90,14 @@ func GetGearRawIconOriginById(id string) ([2]int, bool) {
 func sortRegexMatches(ids []int, regex *rure.Regex) {
 	type IdInfo struct {
 		id    int
+		name  string
 		index [2]int
 	}
 	infos := make([]IdInfo, len(ids))
 	for i, id := range ids {
 		name := names[id]
 		start, end, _ := regex.Find(name)
-		infos[i] = IdInfo{id, [2]int{start, end}}
+		infos[i] = IdInfo{id, name, [2]int{start, end}}
 	}
 	slices.SortFunc(infos, func(aInfo, bInfo IdInfo) int {
 		if aInfo.index[0] != bInfo.index[0] {
@@ -104,6 +105,9 @@ func sortRegexMatches(ids []int, regex *rure.Regex) {
 		}
 		if aInfo.index[1] != bInfo.index[1] {
 			return aInfo.index[1] - bInfo.index[1]
+		}
+		if len(aInfo.name) != len(bInfo.name) {
+			return len(aInfo.name) - len(bInfo.name)
 		}
 		return aInfo.id - bInfo.id
 	})
