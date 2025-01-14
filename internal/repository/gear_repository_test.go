@@ -29,7 +29,7 @@ func TestSearchGearByName(t *testing.T) {
 	sizeArg := 9999
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf(name, tt.args.search, tt.wantLen), func(t *testing.T) {
-			if got, _ := SearchGearByName(tt.args.search, sizeArg); !reflect.DeepEqual(len(got), tt.wantLen) {
+			if got := SearchGearByName(tt.args.search, sizeArg); !reflect.DeepEqual(len(got), tt.wantLen) {
 				t.Errorf("SearchGearByName() = %v, want %v", got, tt.wantLen)
 			}
 		})
