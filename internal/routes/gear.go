@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"itemsim-server/internal/repository"
@@ -10,6 +11,7 @@ import (
 
 func UseGearRoutes(group *echo.Group) {
 	group.GET("/search", search)
+	group.GET("", getGearsById)
 	group.GET("/:id", getGearById)
 	group.GET("/:id/icon", getGearIconById)
 	group.GET("/:id/icon/origin", getGearIconOriginById)
@@ -25,6 +27,20 @@ func search(c echo.Context) error {
 	}
 	res := repository.SearchGearByName(query, 100)
 	return c.JSON(http.StatusOK, res)
+}
+
+func getGearsById(c echo.Context) error {
+	query := c.QueryParam("id")
+	ids := strings.Split(query, ",")
+	gears := make(map[string]json.RawMessage, len(ids))
+	for _, id := range ids {
+		gear, ok := repository.GetGearById(id)
+		if !ok {
+			return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("%s not found", id))
+		}
+		gears[id] = gear
+	}
+	return c.JSON(http.StatusOK, gears)
 }
 
 func getGearById(c echo.Context) error {
