@@ -11,15 +11,23 @@ import (
 	"strings"
 )
 
+type SearchRes struct {
+	Id        int    `json:"id"`
+	Name      string `json:"name"`
+	Icon      string `json:"icon"`
+	Highlight string `json:"highlight"`
+}
+
 var gears map[int]json.RawMessage
 var names map[int]string
+var gearInfos map[int]map[string]interface{}
 var gearOrigins map[int][2]int
 var gearRawOrigins map[int][2]int
 var concatNames string
 var concatIndex []int
 var concatIds []int
 
-func SearchGearByName(search string, size int) (data []json.RawMessage, highlight []string) {
+func SearchGearByName(search string, size int) []SearchRes {
 	search = strings.ToLower(search)
 	pattern, _ := hangul_regexp.GetPattern(search, false, true, true, false)
 	regex := rure.MustCompile("(?i)" + pattern) // (?i): Case insensitive
@@ -48,16 +56,19 @@ func SearchGearByName(search string, size int) (data []json.RawMessage, highligh
 	capturingPattern, _ := hangul_regexp.GetPattern(search, false, true, true, true)
 	capturingRegex := rure.MustCompile("(?i)" + capturingPattern)
 	resultSize := min(len(matchedIds), size)
-	data = make([]json.RawMessage, resultSize)
-	highlight = make([]string, resultSize)
+	result := make([]SearchRes, resultSize)
 	for i, id := range matchedIds {
 		if i == resultSize {
 			break
 		}
-		data[i] = gears[id]
-		highlight[i] = convertHighlight(names[id], capturingRegex)
+		result[i] = SearchRes{
+			Id:        id,
+			Name:      names[id],
+			Icon:      gearInfos[id]["icon"].(string),
+			Highlight: convertHighlight(names[id], capturingRegex),
+		}
 	}
-	return data, highlight
+	return result
 }
 
 func GetGearById(id string) (json.RawMessage, bool) {
@@ -145,6 +156,7 @@ func init() {
 	util.ReadJson("resources/gear-raw-origin.json", &gearRawOrigins)
 
 	names = make(map[int]string)
+	gearInfos = make(map[int]map[string]interface{})
 	concatIndex = make([]int, 0, len(gears))
 	concatIds = make([]int, 0, len(gears))
 	builder := strings.Builder{}
@@ -153,6 +165,7 @@ func init() {
 		if err := json.Unmarshal(gearData, &gear); err != nil {
 			log.Fatal(err)
 		}
+		gearInfos[id] = gear
 		name := strings.ToLower(gear["name"].(string))
 		names[id] = name
 
