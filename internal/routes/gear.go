@@ -64,6 +64,7 @@ func getGearIconOriginById(c echo.Context) error {
 	if !ok {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
+	c.Response().Header().Set("Cache-Control", "public, max-age=86400")
 	return c.JSON(http.StatusOK, origin)
 }
 
@@ -79,5 +80,6 @@ func getGearRawIconOriginById(c echo.Context) error {
 	if !ok {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
+	c.Response().Header().Set("Cache-Control", "public, max-age=86400")
 	return c.JSON(http.StatusOK, origin)
 }
