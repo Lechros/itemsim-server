@@ -1,7 +1,0 @@
-name = "server"
-main = "src/index.ts"
-compatibility_date = "2023-05-23"
-
-[observability]
-enabled = true
-head_sampling_rate = 1
