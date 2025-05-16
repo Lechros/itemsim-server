@@ -18,6 +18,8 @@
 !resources/**
 
 !Dockerfile
+!.github/**
+!scripts/**
 
 !README.md
 !LICENSE

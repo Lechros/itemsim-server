@@ -1,0 +1,47 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+  DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+  DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+  DOCKER_IMAGE_NAME: itemsim-server
+  DOCKER_IMAGE_TAG: ${{ github.sha }}
+  IMAGE_PATH: /tmp/image.tar
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: docker build -t $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG .
+
+      - name: Save Docker image
+        run: docker save $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG > $IMAGE_PATH
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+
+      - name: Transfer and deploy
+        run: |
+          REMOTE_IMAGE_PATH="/tmp/image_${{ github.run_id }}.tar"
+          scp -i ~/.ssh/deploy_key "$IMAGE_PATH" "$DEPLOY_USER@$DEPLOY_HOST:$REMOTE_IMAGE_PATH"
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" "sudo IMAGE_PATH='$REMOTE_IMAGE_PATH' IMAGE_TAG='$DOCKER_IMAGE_TAG' /opt/scripts/deploy.sh"
