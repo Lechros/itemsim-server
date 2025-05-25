@@ -32,13 +32,13 @@ func search(c echo.Context) error {
 func getGearsById(c echo.Context) error {
 	query := c.QueryParam("id")
 	ids := strings.Split(query, ",")
-	gears := make(map[string]json.RawMessage, len(ids))
-	for _, id := range ids {
+	gears := make([]json.RawMessage, len(ids))
+	for i, id := range ids {
 		gear, ok := repository.GetGearById(id)
 		if !ok {
 			return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("%s not found", id))
 		}
-		gears[id] = gear
+		gears[i] = gear
 	}
 	return c.JSON(http.StatusOK, gears)
 }
