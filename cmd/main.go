@@ -17,7 +17,7 @@ func main() {
 	e.Use(middleware.Recover())
 	// CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"https://itemsim.com", "https://itemsim.pages.dev"},
+		AllowOrigins: []string{"https://itemsim.com", "https://itemsim.pages.dev", "https://next.itemsim.com"},
 		AllowMethods: []string{http.MethodGet, http.MethodOptions},
 		MaxAge:       86400,
 	}))
