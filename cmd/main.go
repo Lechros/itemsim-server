@@ -6,9 +6,11 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"itemsim-server/internal/application"
 	"itemsim-server/internal/common/search"
+	"itemsim-server/internal/config"
 	"itemsim-server/internal/domain/gear"
 	"itemsim-server/internal/infrastructure/repository/inmemory"
 	"itemsim-server/internal/presentation/handler"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -26,9 +28,19 @@ func main() {
 		MaxAge:       86400,
 	}))
 
-	// DI
-	gearRepository := inmemory.NewGearRepository()
-	itemRepository := inmemory.NewItemRepository()
+	// Initialize configuration
+	cfg := config.NewConfig()
+
+	// Initialize repositories
+	gearRepository, err := inmemory.NewGearRepository(cfg)
+	if err != nil {
+		log.Fatalf("Failed to initialize gear repository: %v", err)
+	}
+
+	itemRepository, err := inmemory.NewItemRepository(cfg)
+	if err != nil {
+		log.Fatalf("Failed to initialize item repository: %v", err)
+	}
 
 	gearSearcher := search.NewSearcher[gear.Gear](gearRepository.Count())
 

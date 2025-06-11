@@ -1,6 +1,7 @@
 package inmemory
 
 import (
+	"itemsim-server/internal/config"
 	"itemsim-server/internal/domain/gear"
 	"itemsim-server/internal/infrastructure/file"
 )
@@ -10,15 +11,22 @@ type gearRepository struct {
 	iconOriginMap map[int][2]int
 }
 
-func NewGearRepository() gear.Repository {
+func NewGearRepository(config *config.Config) (gear.Repository, error) {
 	dataMap := map[int]map[string]interface{}{}
 	iconOriginMap := map[int][2]int{}
-	file.ReadJson("resources/gear-data.json", &dataMap)
-	file.ReadJson("resources/gear-origin.json", &iconOriginMap)
+
+	if err := file.ReadJson(config.GetFilePath("gear-data.json"), &dataMap); err != nil {
+		return nil, err
+	}
+
+	if err := file.ReadJson(config.GetFilePath("gear-origin.json"), &iconOriginMap); err != nil {
+		return nil, err
+	}
+
 	return &gearRepository{
 		dataMap:       dataMap,
 		iconOriginMap: iconOriginMap,
-	}
+	}, nil
 }
 
 func (r *gearRepository) FindAll() []gear.Gear {
