@@ -35,6 +35,7 @@ func (s *searcherImpl[T]) Add(item T, text string) {
 	s.offsets = append(s.offsets, s.builder.Len())
 	s.texts = append(s.texts, text)
 	s.builder.WriteString(text)
+	s.builder.WriteRune('\n')
 }
 
 func (s *searcherImpl[T]) Search(query string, size int, cmp ItemCmp[T]) []SearchResult[T] {
