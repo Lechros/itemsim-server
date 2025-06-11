@@ -9,8 +9,8 @@ type GearService interface {
 }
 
 type GearSearchResult struct {
-	Id        int
-	Name      string
-	Icon      string
-	Highlight string
+	Id        int    `json:"id"`
+	Name      string `json:"name"`
+	Icon      string `json:"icon"`
+	Highlight string `json:"highlight"`
 }
