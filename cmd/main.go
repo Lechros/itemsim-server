@@ -4,7 +4,11 @@ import (
 	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"itemsim-server/internal/routes"
+	"itemsim-server/internal/application/handler"
+	"itemsim-server/internal/common/search"
+	"itemsim-server/internal/domain/gear"
+	"itemsim-server/internal/domain/item"
+	"itemsim-server/internal/infrastructure/repository/inmemory"
 	"net/http"
 	"os"
 	"os/signal"
@@ -22,11 +26,20 @@ func main() {
 		MaxAge:       86400,
 	}))
 
-	e.GET("/health", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
-	})
-	routes.UseGearRoutes(e.Group("/gears"))
-	routes.UseItemRoutes(e.Group("/items"))
+	// DI
+	gearRepository := inmemory.NewGearRepository()
+	itemRepository := inmemory.NewItemRepository()
+
+	gearSearcher := search.NewSearcher[gear.Gear](gearRepository.Count())
+
+	gearService := gear.NewGearService(gearRepository, gearSearcher)
+	itemService := item.NewItemService(itemRepository)
+
+	systemHandler := handler.NewSystemHandler()
+	gearHandler := handler.NewGearHandler(gearService)
+	itemHandler := handler.NewItemHandler(itemService)
+
+	handler.RegisterRoutes(e, systemHandler, gearHandler, itemHandler)
 
 	// Graceful Shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
