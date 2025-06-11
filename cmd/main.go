@@ -4,11 +4,11 @@ import (
 	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"itemsim-server/internal/application/handler"
+	"itemsim-server/internal/application"
 	"itemsim-server/internal/common/search"
 	"itemsim-server/internal/domain/gear"
-	"itemsim-server/internal/domain/item"
 	"itemsim-server/internal/infrastructure/repository/inmemory"
+	"itemsim-server/internal/presentation/handler"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,8 +32,8 @@ func main() {
 
 	gearSearcher := search.NewSearcher[gear.Gear](gearRepository.Count())
 
-	gearService := gear.NewGearService(gearRepository, gearSearcher)
-	itemService := item.NewItemService(itemRepository)
+	gearService := application.NewGearService(gearRepository, gearSearcher)
+	itemService := application.NewItemService(itemRepository)
 
 	systemHandler := handler.NewSystemHandler()
 	gearHandler := handler.NewGearHandler(gearService)

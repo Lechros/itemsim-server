@@ -2,16 +2,16 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
-	"itemsim-server/internal/domain/gear"
+	"itemsim-server/internal/application"
 	"net/http"
 	"strconv"
 )
 
 type GearHandler struct {
-	gearService gear.Service
+	gearService application.GearService
 }
 
-func NewGearHandler(gearService gear.Service) *GearHandler {
+func NewGearHandler(gearService application.GearService) *GearHandler {
 	return &GearHandler{
 		gearService: gearService,
 	}

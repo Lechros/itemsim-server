@@ -2,7 +2,7 @@ package inmemory
 
 import (
 	"itemsim-server/internal/domain/gear"
-	util "itemsim-server/internal/infrastructure/file"
+	"itemsim-server/internal/infrastructure/file"
 )
 
 type gearRepository struct {
@@ -13,8 +13,8 @@ type gearRepository struct {
 func NewGearRepository() gear.Repository {
 	dataMap := map[int]map[string]interface{}{}
 	iconOriginMap := map[int][2]int{}
-	util.ReadJson("resources/gear-data.json", &dataMap)
-	util.ReadJson("resources/gear-origin.json", &iconOriginMap)
+	file.ReadJson("resources/gear-data.json", &dataMap)
+	file.ReadJson("resources/gear-origin.json", &iconOriginMap)
 	return &gearRepository{
 		dataMap:       dataMap,
 		iconOriginMap: iconOriginMap,

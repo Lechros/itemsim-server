@@ -2,7 +2,7 @@ package inmemory
 
 import (
 	"itemsim-server/internal/domain/item"
-	util "itemsim-server/internal/infrastructure/file"
+	"itemsim-server/internal/infrastructure/file"
 )
 
 type itemRepository struct {
@@ -11,7 +11,7 @@ type itemRepository struct {
 
 func NewItemRepository() item.Repository {
 	iconRawOriginMap := map[string][2]int{}
-	util.ReadJson("resources/item-raw-origin.json", &iconRawOriginMap)
+	file.ReadJson("resources/item-raw-origin.json", &iconRawOriginMap)
 	return &itemRepository{
 		iconRawOriginMap: iconRawOriginMap,
 	}

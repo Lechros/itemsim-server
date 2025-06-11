@@ -1,5 +1,5 @@
-package item
+package application
 
-type Service interface {
+type ItemService interface {
 	GetIconRawOriginById(id string) ([2]int, error)
 }

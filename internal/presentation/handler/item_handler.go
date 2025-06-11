@@ -2,15 +2,15 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
-	"itemsim-server/internal/domain/item"
+	"itemsim-server/internal/application"
 	"net/http"
 )
 
 type ItemHandler struct {
-	itemService item.Service
+	itemService application.ItemService
 }
 
-func NewItemHandler(itemService item.Service) *ItemHandler {
+func NewItemHandler(itemService application.ItemService) *ItemHandler {
 	return &ItemHandler{
 		itemService: itemService,
 	}

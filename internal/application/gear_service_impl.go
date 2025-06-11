@@ -1,17 +1,18 @@
-package gear
+package application
 
 import (
 	"errors"
 	"itemsim-server/internal/common/search"
+	"itemsim-server/internal/domain/gear"
 )
 
-type serviceImpl struct {
-	gearRepository Repository
-	searcher       search.Searcher[Gear]
+type gearServiceImpl struct {
+	gearRepository gear.Repository
+	searcher       search.Searcher[gear.Gear]
 }
 
-func NewGearService(gearRepository Repository, searcher search.Searcher[Gear]) Service {
-	service := serviceImpl{
+func NewGearService(gearRepository gear.Repository, searcher search.Searcher[gear.Gear]) GearService {
+	service := gearServiceImpl{
 		gearRepository: gearRepository,
 		searcher:       searcher,
 	}
@@ -21,8 +22,8 @@ func NewGearService(gearRepository Repository, searcher search.Searcher[Gear]) S
 	return &service
 }
 
-func (s *serviceImpl) SearchByName(query string) []GearSearchResult {
-	searched := s.searcher.Search(query, 100, func(a Gear, b Gear) int {
+func (s *gearServiceImpl) SearchByName(query string) []GearSearchResult {
+	searched := s.searcher.Search(query, 100, func(a gear.Gear, b gear.Gear) int {
 		return a.Id - b.Id
 	})
 	results := make([]GearSearchResult, len(searched))
@@ -37,7 +38,7 @@ func (s *serviceImpl) SearchByName(query string) []GearSearchResult {
 	return results
 }
 
-func (s *serviceImpl) GetDataById(id int) (map[string]interface{}, error) {
+func (s *gearServiceImpl) GetDataById(id int) (map[string]interface{}, error) {
 	data, found := s.gearRepository.FindDataById(id)
 	if !found {
 		return nil, errors.New("not found")
@@ -45,7 +46,7 @@ func (s *serviceImpl) GetDataById(id int) (map[string]interface{}, error) {
 	return data, nil
 }
 
-func (s *serviceImpl) GetIconOriginById(id int) ([2]int, error) {
+func (s *gearServiceImpl) GetIconOriginById(id int) ([2]int, error) {
 	origin, found := s.gearRepository.FindIconOriginById(id)
 	if !found {
 		return [2]int{}, errors.New("not found")

@@ -1,6 +1,6 @@
-package gear
+package application
 
-type Service interface {
+type GearService interface {
 	SearchByName(query string) []GearSearchResult
 
 	GetDataById(id int) (map[string]interface{}, error)
