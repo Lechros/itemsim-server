@@ -22,10 +22,20 @@ func NewGearService(gearRepository gear.Repository, searcher search.Searcher[gea
 	return &service
 }
 
-func (s *gearServiceImpl) SearchByName(query string) []GearSearchResult {
-	searched := s.searcher.Search(query, 100, func(a gear.Gear, b gear.Gear) int {
+func (s *gearServiceImpl) SearchByName(query string, prefix *int) ([]GearSearchResult, error) {
+	cmp := func(a gear.Gear, b gear.Gear) int {
 		return a.Id - b.Id
-	})
+	}
+	var filter search.ItemFilter[gear.Gear]
+	if prefix != nil {
+		if *prefix <= 0 {
+			return []GearSearchResult{}, errors.New("invalid type")
+		}
+		filter = func(g gear.Gear) bool {
+			return isPrefix(g.Id, *prefix)
+		}
+	}
+	searched := s.searcher.Search(query, 100, cmp, filter)
 	results := make([]GearSearchResult, len(searched))
 	for i, item := range searched {
 		results[i] = GearSearchResult{
@@ -35,7 +45,7 @@ func (s *gearServiceImpl) SearchByName(query string) []GearSearchResult {
 			Highlight: item.Highlight,
 		}
 	}
-	return results
+	return results, nil
 }
 
 func (s *gearServiceImpl) GetDataById(id int) (map[string]interface{}, error) {
@@ -52,4 +62,14 @@ func (s *gearServiceImpl) GetIconOriginById(id int) ([2]int, error) {
 		return [2]int{}, errors.New("not found")
 	}
 	return origin, nil
+}
+
+func isPrefix(n int, prefix int) bool {
+	for n >= prefix {
+		if n == prefix {
+			return true
+		}
+		n /= 10
+	}
+	return false
 }

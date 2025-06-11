@@ -38,7 +38,7 @@ func (s *searcherImpl[T]) Add(item T, text string) {
 	s.builder.WriteRune('\n')
 }
 
-func (s *searcherImpl[T]) Search(query string, size int, cmp ItemCmp[T]) []SearchResult[T] {
+func (s *searcherImpl[T]) Search(query string, size int, cmp ItemCmp[T], filter ItemFilter[T]) []SearchResult[T] {
 	matched := make([]matchResult[T], 0) // 매치된 아이템 인덱스 목록
 
 	regex := getNonCapturingRegex(query)
@@ -56,6 +56,17 @@ func (s *searcherImpl[T]) Search(query string, size int, cmp ItemCmp[T]) []Searc
 				lastIndex = index
 			}
 		}
+	}
+
+	if filter != nil {
+		i := 0
+		for _, item := range matched {
+			if filter(item.Item) {
+				matched[i] = item
+				i++
+			}
+		}
+		matched = matched[:i]
 	}
 
 	slices.SortStableFunc(matched, func(a, b matchResult[T]) int {

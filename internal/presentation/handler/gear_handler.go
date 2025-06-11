@@ -22,7 +22,19 @@ func (h *GearHandler) Search(c echo.Context) error {
 	if query == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "query is required")
 	}
-	results := h.gearService.SearchByName(query)
+	prefix := c.QueryParam("type")
+	var prefixInt *int = nil
+	if prefix != "" {
+		_prefixInt, err := strconv.Atoi(prefix)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid type")
+		}
+		prefixInt = &_prefixInt
+	}
+	results, err := h.gearService.SearchByName(query, prefixInt)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 	return c.JSON(http.StatusOK, results)
 }
 
