@@ -1,7 +1,7 @@
 package application
 
 type GearService interface {
-	SearchByName(query string) []GearSearchResult
+	SearchByName(query string, prefix *int) ([]GearSearchResult, error)
 
 	GetDataById(id int) (map[string]interface{}, error)
 

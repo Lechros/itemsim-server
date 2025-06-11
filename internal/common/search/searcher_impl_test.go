@@ -26,7 +26,7 @@ func Test_searcherImpl_Search_Count(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := fixture_searcherImpl()
-			if got := s.Search(tt.args.query, tt.args.size, strings.Compare); !reflect.DeepEqual(len(got), tt.wantCount) {
+			if got := s.Search(tt.args.query, tt.args.size, strings.Compare, nil); !reflect.DeepEqual(len(got), tt.wantCount) {
 				t.Errorf("len(Search()) = %v, wantCount %v", len(got), tt.wantCount)
 			}
 		})
@@ -55,7 +55,7 @@ func Test_searcherImpl_Search_Sort(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := fixture_searcherImpl()
-			if got := s.Search(tt.args.query, tt.args.size, cmp); !reflect.DeepEqual(got[0].Text, tt.wantFirstText) {
+			if got := s.Search(tt.args.query, tt.args.size, cmp, nil); !reflect.DeepEqual(got[0].Text, tt.wantFirstText) {
 				t.Errorf("Search() = %v, wantFirstText %v", got, tt.wantFirstText)
 			}
 		})
@@ -79,7 +79,7 @@ func Test_searcherImpl_Search_Highlight(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := fixture_searcherImpl()
-			if got := s.Search(tt.args.query, tt.args.size, strings.Compare); !reflect.DeepEqual(got[0].Highlight, tt.wantFirstHighlight) {
+			if got := s.Search(tt.args.query, tt.args.size, strings.Compare, nil); !reflect.DeepEqual(got[0].Highlight, tt.wantFirstHighlight) {
 				t.Errorf("Search() = %v, wantFirstHighlight %v", got, tt.wantFirstHighlight)
 			}
 		})
