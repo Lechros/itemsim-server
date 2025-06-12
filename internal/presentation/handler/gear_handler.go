@@ -53,7 +53,7 @@ func (h *GearHandler) GetData(c echo.Context) error {
 }
 
 func (h *GearHandler) GetAllData(c echo.Context) error {
-	ids := c.QueryParam("ids")
+	ids := c.QueryParam("id")
 	if ids == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "ids is required")
 	}
