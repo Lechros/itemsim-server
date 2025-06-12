@@ -56,6 +56,14 @@ func (s *gearServiceImpl) GetDataById(id int) (map[string]interface{}, error) {
 	return data, nil
 }
 
+func (s *gearServiceImpl) GetAllDataById(ids []int) ([]map[string]interface{}, error) {
+	data, err := s.gearRepository.FindAllDataById(ids)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
 func (s *gearServiceImpl) GetIconOriginById(id int) ([2]int, error) {
 	origin, found := s.gearRepository.FindIconOriginById(id)
 	if !found {

@@ -5,6 +5,8 @@ type GearService interface {
 
 	GetDataById(id int) (map[string]interface{}, error)
 
+	GetAllDataById(ids []int) ([]map[string]interface{}, error)
+
 	GetIconOriginById(id int) ([2]int, error)
 }
 

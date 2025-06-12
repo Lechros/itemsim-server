@@ -20,6 +20,7 @@ func registerSystemRoutes(e *echo.Echo, h *SystemHandler) {
 
 func registerGearRoutes(group *echo.Group, h *GearHandler) {
 	group.GET("/search", h.Search)
+	group.GET("", h.GetAllData)
 	group.GET("/:id", h.GetData)
 	group.GET("/:id/icon/origin", h.GetIconOrigin)
 }

@@ -5,6 +5,7 @@ import (
 	"itemsim-server/internal/application"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type GearHandler struct {
@@ -49,6 +50,27 @@ func (h *GearHandler) GetData(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, result)
+}
+
+func (h *GearHandler) GetAllData(c echo.Context) error {
+	ids := c.QueryParam("ids")
+	if ids == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "ids is required")
+	}
+	idsStrList := strings.Split(ids, ",")
+	idList := make([]int, 0, len(idsStrList))
+	for _, idStr := range idsStrList {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid ids")
+		}
+		idList = append(idList, id)
+	}
+	results, err := h.gearService.GetAllDataById(idList)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, results)
 }
 
 func (h *GearHandler) GetIconOrigin(c echo.Context) error {

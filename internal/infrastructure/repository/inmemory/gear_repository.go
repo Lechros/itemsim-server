@@ -1,6 +1,7 @@
 package inmemory
 
 import (
+	"errors"
 	"itemsim-server/internal/config"
 	"itemsim-server/internal/domain/gear"
 	"itemsim-server/internal/infrastructure/file"
@@ -51,6 +52,18 @@ func (r *gearRepository) Count() int {
 func (r *gearRepository) FindDataById(id int) (map[string]interface{}, bool) {
 	data, ok := r.dataMap[id]
 	return data, ok
+}
+
+func (r *gearRepository) FindAllDataById(ids []int) ([]map[string]interface{}, error) {
+	var result = make([]map[string]interface{}, len(ids))
+	for i, id := range ids {
+		data, found := r.dataMap[id]
+		if !found {
+			return nil, errors.New("not found")
+		}
+		result[i] = data
+	}
+	return result, nil
 }
 
 func (r *gearRepository) FindIconOriginById(id int) ([2]int, bool) {
