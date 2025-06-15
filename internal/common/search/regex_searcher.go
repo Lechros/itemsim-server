@@ -13,16 +13,16 @@ type matchResult[T any] struct {
 	Start int
 }
 
-// searcherImpl 아이템 목록에서 regexp를 사용해 검색합니다.
-type searcherImpl[T any] struct {
+// regexSearcher 아이템 목록에서 regexp를 사용해 검색합니다.
+type regexSearcher[T any] struct {
 	items   []T
 	builder strings.Builder // 각 아이템의 text를 연결한 문자열, 사이에 '\n'을 추가함.
 	texts   []string        // 각 아이템의 text 목록
 	offsets []int           // 각 아이템 text의 text 내에서의 인덱스
 }
 
-func NewSearcher[T any](cap int) Searcher[T] {
-	return &searcherImpl[T]{
+func NewRegexSearcher[T any](cap int) Searcher[T] {
+	return &regexSearcher[T]{
 		items:   make([]T, 0, cap),
 		builder: strings.Builder{},
 		texts:   make([]string, 0, cap),
@@ -30,7 +30,7 @@ func NewSearcher[T any](cap int) Searcher[T] {
 	}
 }
 
-func (s *searcherImpl[T]) Add(item T, text string) {
+func (s *regexSearcher[T]) Add(item T, text string) {
 	s.items = append(s.items, item)
 	s.offsets = append(s.offsets, s.builder.Len())
 	s.texts = append(s.texts, text)
@@ -38,7 +38,7 @@ func (s *searcherImpl[T]) Add(item T, text string) {
 	s.builder.WriteRune('\n')
 }
 
-func (s *searcherImpl[T]) Search(query string, size int, cmp ItemCmp[T], filter ItemFilter[T]) []SearchResult[T] {
+func (s *regexSearcher[T]) Search(query string, size int, cmp ItemCmp[T], filter ItemFilter[T]) []SearchResult[T] {
 	matched := make([]matchResult[T], 0) // 매치된 아이템 인덱스 목록
 
 	regex := getNonCapturingRegex(query)
@@ -96,7 +96,7 @@ func (s *searcherImpl[T]) Search(query string, size int, cmp ItemCmp[T], filter 
 	return result
 }
 
-func (s *searcherImpl[T]) findIndexForPosition(position int) int {
+func (s *regexSearcher[T]) findIndexForPosition(position int) int {
 	index, found := slices.BinarySearch(s.offsets, position)
 	if !found {
 		return index - 1

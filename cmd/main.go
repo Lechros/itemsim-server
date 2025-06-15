@@ -42,7 +42,7 @@ func main() {
 		log.Fatalf("Failed to initialize item repository: %v", err)
 	}
 
-	gearSearcher := search.NewSearcher[gear.Gear](gearRepository.Count())
+	gearSearcher := search.NewRegexSearcher[gear.Gear](gearRepository.Count())
 
 	gearService := application.NewGearService(gearRepository, gearSearcher)
 	itemService := application.NewItemService(itemRepository)
