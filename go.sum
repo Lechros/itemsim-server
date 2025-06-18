@@ -4,6 +4,8 @@ github.com/Lechros/hangul_regexp v0.1.0 h1:beYep4BTc/6q4gHIIpAnAAzRoPt9lsuD6w3Xf
 github.com/Lechros/hangul_regexp v0.1.0/go.mod h1:oJGuy3+/S+jhRtxrkohXUfF/zJL4ti7sluWh1e8v+D8=
 github.com/Lechros/hangul_regexp v0.2.0 h1:y++mCNFwdBkQ6mS6ec1uS+QddjwIEfOAox/UBL4vWK0=
 github.com/Lechros/hangul_regexp v0.2.0/go.mod h1:oJGuy3+/S+jhRtxrkohXUfF/zJL4ti7sluWh1e8v+D8=
+github.com/achille-roussel/kway-go v1.0.1 h1:nEYMoiODUzdNr8JLQ+z+R6tMdx07AOwMO+a0HuaYf48=
+github.com/achille-roussel/kway-go v1.0.1/go.mod h1:782CZIDvpwAMIcSgElDo7sxy9Bp/Vd/vwHJ8982lQnA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
