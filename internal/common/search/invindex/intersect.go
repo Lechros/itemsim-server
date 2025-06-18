@@ -115,10 +115,11 @@ func intersectNew(cur, next []indexPosition) []indexPositions {
 	for ci < len(cur) && ni < len(next) {
 		if cur[ci].index == next[ni].index {
 			index := cur[ci].index
-			for ni < len(next) && next[ni].index == index && cur[ci].position >= next[ni].position {
+			position := cur[ci].position
+			for ni < len(next) && next[ni].index == index && position >= next[ni].position {
 				ni++
 			}
-			if ni < len(next) && next[ni].index == index && cur[ci].position < next[ni].position {
+			if ni < len(next) && next[ni].index == index && position < next[ni].position {
 				buf[bi] = indexPositions{
 					index:     index,
 					positions: []int{cur[ci].position, next[ni].position},
@@ -153,10 +154,11 @@ func intersectExisting(buf []indexPositions, cur []indexPositions, next []indexP
 	for ci < len(cur) && ni < len(next) {
 		if cur[ci].index == next[ni].index {
 			index := cur[ci].index
-			for ni < len(next) && next[ni].index == index && cur[ci].positions[len(cur[ci].positions)-1] >= next[ni].position {
+			position := cur[ci].positions[len(cur[ci].positions)-1]
+			for ni < len(next) && next[ni].index == index && position >= next[ni].position {
 				ni++
 			}
-			if ni < len(next) && next[ni].index == index && cur[ci].positions[len(cur[ci].positions)-1] < next[ni].position {
+			if ni < len(next) && next[ni].index == index && position < next[ni].position {
 				buf[bi] = indexPositions{
 					index:     index,
 					positions: append(cur[ci].positions, next[ni].position),

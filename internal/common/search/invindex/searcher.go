@@ -103,7 +103,6 @@ func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp search.Ite
 			}
 		}
 	}
-
 	infos := set.Infos()
 
 	if filter != nil {
@@ -117,8 +116,6 @@ func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp search.Ite
 		infos = infos[:i]
 	}
 
-	size = min(len(infos), size)
-
 	itemCmp := func(a, b indexPositions) int {
 		// 첫 매치 위치가 빠른 결과 우선
 		if a.positions[0] != b.positions[0] {
@@ -128,6 +125,7 @@ func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp search.Ite
 		return cmp(s.items[a.index], s.items[b.index])
 	}
 
+	size = min(len(infos), size)
 	h := &indexPositionsHeap{items: make([]indexPositions, 0, size), cmp: itemCmp}
 	heap.Init(h)
 	for _, info := range infos {
@@ -148,26 +146,10 @@ func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp search.Ite
 		result[i] = search.Result[T]{
 			Item:      s.items[info.index],
 			Text:      s.texts[info.index],
-			Highlight: getHighlightByInfo(s.texts[info.index], info.positions),
+			Highlight: getHighlight(s.texts[info.index], info.positions),
 		}
 	}
 	return result
-}
-
-type indexPositionsHeap struct {
-	items []indexPositions
-	cmp   func(a, b indexPositions) int
-}
-
-func (h *indexPositionsHeap) Len() int           { return len(h.items) }
-func (h *indexPositionsHeap) Less(i, j int) bool { return h.cmp(h.items[i], h.items[j]) > 0 }
-func (h *indexPositionsHeap) Swap(i, j int)      { h.items[i], h.items[j] = h.items[j], h.items[i] }
-func (h *indexPositionsHeap) Push(x any)         { h.items = append(h.items, x.(indexPositions)) }
-func (h *indexPositionsHeap) Pop() any {
-	n := len(h.items)
-	val := h.items[n-1]
-	h.items = h.items[:n-1]
-	return val
 }
 
 func (s *invertedIndexSearcher[T]) addFullRuneToIndex(r rune, index int, position int) {
@@ -207,7 +189,7 @@ func getHangulRunesForIIndex(hangul rune) []rune {
 	return result
 }
 
-func getHighlightByInfo(text string, positions []int) string {
+func getHighlight(text string, positions []int) string {
 	builder := strings.Builder{}
 	builder.Grow(len(text)) // Generous amount of buffer is faster than utf8.RuneCountInString, or reallocation
 
@@ -223,4 +205,20 @@ func getHighlightByInfo(text string, positions []int) string {
 		}
 	}
 	return builder.String()
+}
+
+type indexPositionsHeap struct {
+	items []indexPositions
+	cmp   func(a, b indexPositions) int
+}
+
+func (h *indexPositionsHeap) Len() int           { return len(h.items) }
+func (h *indexPositionsHeap) Less(i, j int) bool { return h.cmp(h.items[i], h.items[j]) > 0 }
+func (h *indexPositionsHeap) Swap(i, j int)      { h.items[i], h.items[j] = h.items[j], h.items[i] }
+func (h *indexPositionsHeap) Push(x any)         { h.items = append(h.items, x.(indexPositions)) }
+func (h *indexPositionsHeap) Pop() any {
+	n := len(h.items)
+	val := h.items[n-1]
+	h.items = h.items[:n-1]
+	return val
 }
