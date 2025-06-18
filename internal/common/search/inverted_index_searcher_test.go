@@ -26,7 +26,7 @@ func Test_invertedIndexSearcher_Search_Count(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := fixture_invertedIndexSearcher()
 			if got := s.Search(tt.args.query, tt.args.size, strings.Compare, nil); !reflect.DeepEqual(len(got), tt.wantCount) {
-				t.Errorf("len(Search()) = %v, wantCount %v", len(got), tt.wantCount)
+				t.Errorf("Search() = %v, wantCount %v", got, tt.wantCount)
 			}
 		})
 	}

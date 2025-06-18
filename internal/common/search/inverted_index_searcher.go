@@ -1,9 +1,9 @@
 package search
 
 import (
-	"fmt"
+	"container/heap"
 	"slices"
-	"time"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 )
@@ -57,9 +57,7 @@ func (s *invertedIndexSearcher[T]) Add(item T, text string) {
 }
 
 func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp ItemCmp[T], filter ItemFilter[T]) []SearchResult[T] {
-	start := time.Now()
 	set := newItemInfoSet()
-	var indexes []int = nil
 	for i, r := range query {
 		if set.IsEmpty() {
 			return []SearchResult[T]{}
@@ -79,14 +77,14 @@ func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp ItemCmp[T]
 					set3.Intersect(s.iindex[assembleFromIndexes(choseongIndex, jungseongIndex, 0)])
 					set3.Intersect(s.piindex[firstJongseong])
 					set3.Intersect(s.piindex[secondJongseong])
-					indexes = collect(set1, set2, set3)
+					set = Union(set1, set2, set3)
 				} else {
 					// 해당 글자도 매칭하고, 받침을 초성으로 따로 매칭해야 함. ex) 한 -> 한 / 하+ㄴ
 					set1 := set.Intersection(s.iindex[r])
 					set2 := set
 					set2.Intersect(s.iindex[assembleFromIndexes(choseongIndex, jungseongIndex, 0)])
 					set2.Intersect(s.piindex[firstJongseong])
-					indexes = collect(set1, set2)
+					set = Union(set1, set2)
 				}
 			}
 		} else { // 마지막 글자가 아닌 문자는 초성 매칭이거나, 완전 매칭이어야 함
@@ -103,91 +101,71 @@ func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp ItemCmp[T]
 			}
 		}
 	}
-	if indexes == nil {
-		indexes = collect(set)
-	}
-	iiDoneTime := time.Now()
 
-	matched := make([]itemStart[T], 0, len(indexes))
-	regex := getNonCapturingRegex(query)
-	//pattern, _ := hangul_regexp.GetPattern(query, false, true, false, false)
-	//regex := regexp.MustCompile("(?i)" + pattern)
-	for _, index := range indexes {
-		text := s.texts[index]
-		//start := regex.FindStringIndex(text)[0]
-		start, _, _ := regex.Find(text)
-		matched = append(matched, itemStart[T]{
-			index: index,
-			start: start,
-		})
-	}
-
-	matchDoneTime := time.Now()
+	infos := set.Infos()
 
 	if filter != nil {
 		i := 0
-		for _, match := range matched {
-			if filter(s.items[match.index]) {
-				matched[i] = match
+		for _, info := range infos {
+			if filter(s.items[info.index]) {
+				infos[i] = info
 				i++
 			}
 		}
-		matched = matched[:i]
+		infos = infos[:i]
 	}
 
-	slices.SortFunc(matched, func(a, b itemStart[T]) int {
+	size = min(len(infos), size)
+
+	itemCmp := func(a, b extendedItemInfo) int {
 		// 첫 매치 위치가 빠른 결과 우선
-		if a.start != b.start {
-			return a.start - b.start
+		if a.positions[0] != b.positions[0] {
+			return a.positions[0] - b.positions[0]
 		}
 		// 이후 입력 정렬 기준으로 정렬
 		return cmp(s.items[a.index], s.items[b.index])
-	})
+	}
 
-	sortDoneTime := time.Now()
+	h := &Heap{items: make([]extendedItemInfo, 0, size), cmp: itemCmp}
+	heap.Init(h)
+	for _, info := range infos {
+		if h.Len() < size {
+			heap.Push(h, info)
+		} else if itemCmp(info, h.items[0]) < 0 { // 새 원소가 루트(최대값)보다 작으면 교체
+			h.items[0] = info
+			heap.Fix(h, 0)
+		}
+	}
+	slices.SortFunc(h.items, itemCmp)
 
-	size = min(len(matched), size)
 	result := make([]SearchResult[T], size)
-	capturingRegex := getCapturingRegex(query)
-
-	for i, item := range matched {
+	for i, info := range h.items {
 		if i == size {
 			break
 		}
 		result[i] = SearchResult[T]{
-			Item:      s.items[item.index],
-			Text:      s.texts[item.index],
-			Highlight: getHighlight(s.texts[item.index], capturingRegex),
+			Item:      s.items[info.index],
+			Text:      s.texts[info.index],
+			Highlight: getHighlightByInfo(s.texts[info.index], info.positions),
 		}
 	}
-
-	highlightDoneTime := time.Now()
-
-	fmt.Printf("index lookup: %v, match: %v, sort: %v, highlight: %v\n",
-		iiDoneTime.Sub(start),
-		matchDoneTime.Sub(iiDoneTime),
-		sortDoneTime.Sub(matchDoneTime),
-		highlightDoneTime.Sub(sortDoneTime),
-	)
-	fmt.Printf("lookup size: %v, filtered size: %v, final size: %v\n", len(indexes), len(matched), len(result))
-
 	return result
 }
 
-func collect(sets ...*itemInfoSet) []int {
-	indexes := make(map[int]struct{})
-	for _, set := range sets {
-		if set.Data != nil {
-			for _, info := range set.Data {
-				indexes[info.index] = struct{}{}
-			}
-		}
-	}
-	result := make([]int, 0, len(indexes))
-	for index := range indexes {
-		result = append(result, index)
-	}
-	return result
+type Heap struct {
+	items []extendedItemInfo
+	cmp   func(a, b extendedItemInfo) int
+}
+
+func (h *Heap) Len() int           { return len(h.items) }
+func (h *Heap) Less(i, j int) bool { return h.cmp(h.items[i], h.items[j]) > 0 }
+func (h *Heap) Swap(i, j int)      { h.items[i], h.items[j] = h.items[j], h.items[i] }
+func (h *Heap) Push(x any)         { h.items = append(h.items, x.(extendedItemInfo)) }
+func (h *Heap) Pop() any {
+	n := len(h.items)
+	val := h.items[n-1]
+	h.items = h.items[:n-1]
+	return val
 }
 
 func (s *invertedIndexSearcher[T]) addFullRuneToIndex(r rune, index int, position int) {
@@ -225,6 +203,24 @@ func getHangulRunesForIIndex(hangul rune) []rune {
 		result = append(result, assembleFromIndexes(choseongIndex, jungseongIndex, jongseongIndex))
 	}
 	return result
+}
+
+func getHighlightByInfo(text string, positions []int) string {
+	builder := strings.Builder{}
+	builder.Grow(len(text)) // Generous amount of buffer is faster than utf8.RuneCountInString, or reallocation
+
+	i := 0
+	for pos := range text {
+		if i == len(positions) || positions[i] > pos {
+			builder.WriteRune('0')
+		} else if positions[i] == pos {
+			builder.WriteRune('1')
+			i++
+		} else {
+			panic("invalid positions")
+		}
+	}
+	return builder.String()
 }
 
 func isHangul(r rune) bool {
