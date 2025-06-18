@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	cache "github.com/victorspringer/http-cache"
+	"github.com/victorspringer/http-cache/adapter/memory"
 	"itemsim-server/internal/application"
 	"itemsim-server/internal/common/search"
 	"itemsim-server/internal/config"
@@ -51,7 +53,23 @@ func main() {
 	gearHandler := handler.NewGearHandler(gearService)
 	itemHandler := handler.NewItemHandler(itemService)
 
-	handler.RegisterRoutes(e, systemHandler, gearHandler, itemHandler)
+	// Setup response cache
+	memcached, err := memory.NewAdapter(
+		memory.AdapterWithAlgorithm(memory.LRU),
+		memory.AdapterWithCapacity(1<<16),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	cacheClient, err := cache.NewClient(
+		cache.ClientWithAdapter(memcached),
+		cache.ClientWithTTL(24*time.Hour),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	handler.RegisterRoutes(e, systemHandler, gearHandler, itemHandler, cacheClient)
 
 	// Graceful Shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
