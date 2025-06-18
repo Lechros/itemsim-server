@@ -3,7 +3,6 @@ package search
 import (
 	"github.com/achille-roussel/kway-go"
 	"iter"
-	"slices"
 )
 
 type extendedItemInfo struct {
@@ -13,7 +12,7 @@ type extendedItemInfo struct {
 
 type ItemInfoSet struct {
 	data []extendedItemInfo // 실제로 Intersect 가 수행된 이후에는 data 에 저장된다.
-	temp []extendedItemInfo
+	temp []itemInfo         // 첫 Intersect 인 경우 other 를 그대로 가져온다.
 }
 
 func newItemInfoSet() *ItemInfoSet {
@@ -35,11 +34,15 @@ func (s *ItemInfoSet) Infos() []extendedItemInfo {
 		return s.data
 	} else if s.temp != nil {
 		result := make([]extendedItemInfo, 0, len(s.temp))
+		lastIndex := -1
 		for _, item := range s.temp {
-			result = append(result, extendedItemInfo{
-				index:     item.index,
-				positions: []int{item.positions[0]},
-			})
+			if item.index > lastIndex {
+				result = append(result, extendedItemInfo{
+					index:     item.index,
+					positions: []int{item.position},
+				})
+				lastIndex = item.index
+			}
 		}
 		return result
 	} else {
@@ -47,26 +50,27 @@ func (s *ItemInfoSet) Infos() []extendedItemInfo {
 	}
 }
 
-func (s *ItemInfoSet) Intersect(other []extendedItemInfo) {
+func (s *ItemInfoSet) Intersect(other []itemInfo) {
 	if other == nil {
 		s.data = []extendedItemInfo{}
 	} else if s.data != nil {
-		s.data = intersectInPlace(s.data, other)
+		s.data = intersectExisting(s.data, s.data, other)
 	} else if s.temp != nil {
-		s.data = intersectTemp(s.temp, other)
+		s.data = intersectNew(s.temp, other)
+		s.temp = nil
 	} else {
 		s.temp = other
 	}
 }
 
-func (s *ItemInfoSet) Intersection(other []extendedItemInfo) *ItemInfoSet {
+func (s *ItemInfoSet) Intersection(other []itemInfo) *ItemInfoSet {
 	result := newItemInfoSet()
 	if other == nil {
 		result.data = []extendedItemInfo{}
 	} else if s.data != nil {
-		result.data = intersectCloned(s.data, other)
+		result.data = intersectExisting(make([]extendedItemInfo, min(len(s.data), len(other))), s.data, other)
 	} else if s.temp != nil {
-		result.data = intersectTemp(s.temp, other)
+		result.data = intersectNew(s.temp, other)
 	} else {
 		result.temp = other
 	}
@@ -102,7 +106,7 @@ func Union(sets ...*ItemInfoSet) *ItemInfoSet {
 	return &ItemInfoSet{result, nil}
 }
 
-func intersectTemp(cur []extendedItemInfo, next []extendedItemInfo) []extendedItemInfo {
+func intersectNew(cur, next []itemInfo) []extendedItemInfo {
 	if len(cur) == 0 {
 		return []extendedItemInfo{}
 	}
@@ -116,20 +120,22 @@ func intersectTemp(cur []extendedItemInfo, next []extendedItemInfo) []extendedIt
 	for ci < len(cur) && ni < len(next) {
 		if cur[ci].index == next[ni].index {
 			index := cur[ci].index
-			position := cur[ci].positions[0]
-			pi, found := slices.BinarySearch(next[ni].positions, position)
-			if found {
-				pi++
+			for ni < len(next) && next[ni].index == index && cur[ci].position >= next[ni].position {
+				ni++
 			}
-			if pi < len(next[ni].positions) && next[ni].positions[pi] > position {
+			if ni < len(next) && next[ni].index == index && cur[ci].position < next[ni].position {
 				buf[bi] = extendedItemInfo{
 					index:     index,
-					positions: []int{position, next[ni].positions[pi]},
+					positions: []int{cur[ci].position, next[ni].position},
 				}
 				bi++
 			}
-			ci++
-			ni++
+			for ci < len(cur) && cur[ci].index == index {
+				ci++
+			}
+			for ni < len(next) && next[ni].index == index {
+				ni++
+			}
 		} else if cur[ci].index < next[ni].index {
 			ci++
 		} else {
@@ -139,74 +145,35 @@ func intersectTemp(cur []extendedItemInfo, next []extendedItemInfo) []extendedIt
 	return buf[:bi]
 }
 
-func intersectInPlace(cur []extendedItemInfo, next []extendedItemInfo) []extendedItemInfo {
+func intersectExisting(buf []extendedItemInfo, cur []extendedItemInfo, next []itemInfo) []extendedItemInfo {
 	if len(cur) == 0 {
 		return []extendedItemInfo{}
 	}
 	if len(next) == 0 {
 		return []extendedItemInfo{}
 	}
-	buf := cur
 	bi := 0
 	ci := 0
 	ni := 0
 	for ci < len(cur) && ni < len(next) {
 		if cur[ci].index == next[ni].index {
 			index := cur[ci].index
-			position := cur[ci].positions[len(cur[ci].positions)-1]
-			pi, found := slices.BinarySearch(next[ni].positions, position)
-			if found {
-				pi++
+			for ni < len(next) && next[ni].index == index && cur[ci].positions[len(cur[ci].positions)-1] >= next[ni].position {
+				ni++
 			}
-			if pi < len(next[ni].positions) && next[ni].positions[pi] > position {
+			if ni < len(next) && next[ni].index == index && cur[ci].positions[len(cur[ci].positions)-1] < next[ni].position {
 				buf[bi] = extendedItemInfo{
 					index:     index,
-					positions: append(cur[ci].positions, next[ni].positions[pi]),
+					positions: append(cur[ci].positions, next[ni].position),
 				}
 				bi++
 			}
-			ci++
-			ni++
-		} else if cur[ci].index < next[ni].index {
-			ci++
-		} else {
-			ni++
-		}
-	}
-	return buf[:bi]
-}
-
-func intersectCloned(cur []extendedItemInfo, next []extendedItemInfo) []extendedItemInfo {
-	if len(cur) == 0 {
-		return []extendedItemInfo{}
-	}
-	if len(next) == 0 {
-		return []extendedItemInfo{}
-	}
-	buf := make([]extendedItemInfo, min(len(cur), len(next)))
-	bi := 0
-	ci := 0
-	ni := 0
-	for ci < len(cur) && ni < len(next) {
-		if cur[ci].index == next[ni].index {
-			index := cur[ci].index
-			position := cur[ci].positions[len(cur[ci].positions)-1]
-			pi, found := slices.BinarySearch(next[ni].positions, position)
-			if found {
-				pi++
+			for ci < len(cur) && cur[ci].index == index {
+				ci++
 			}
-			if pi < len(next[ni].positions) && next[ni].positions[pi] > position {
-				positions := make([]int, len(cur[ci].positions))
-				copy(positions, cur[ci].positions)
-				positions = append(positions, next[ni].positions[pi])
-				buf[bi] = extendedItemInfo{
-					index:     index,
-					positions: positions,
-				}
-				bi++
+			for ni < len(next) && next[ni].index == index {
+				ni++
 			}
-			ci++
-			ni++
 		} else if cur[ci].index < next[ni].index {
 			ci++
 		} else {
