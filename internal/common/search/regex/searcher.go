@@ -39,7 +39,7 @@ func (s *regexSearcher[T]) Add(item T, text string) {
 	s.builder.WriteRune('\n')
 }
 
-func (s *regexSearcher[T]) Search(query string, size int, cmp search.ItemCmp[T], filter search.ItemFilter[T]) []search.SearchResult[T] {
+func (s *regexSearcher[T]) Search(query string, size int, cmp search.ItemCmp[T], filter search.ItemFilter[T]) []search.Result[T] {
 	matched := make([]matchResult[T], 0) // 매치된 아이템 인덱스 목록
 
 	regex := getNonCapturingRegex(query)
@@ -80,14 +80,14 @@ func (s *regexSearcher[T]) Search(query string, size int, cmp search.ItemCmp[T],
 	})
 
 	size = min(len(matched), size)
-	result := make([]search.SearchResult[T], size)
+	result := make([]search.Result[T], size)
 
 	capturingRegex := getCapturingRegex(query)
 	for i, item := range matched {
 		if i == size {
 			break
 		}
-		result[i] = search.SearchResult[T]{
+		result[i] = search.Result[T]{
 			Item:      item.Item,
 			Text:      item.Text,
 			Highlight: getHighlight(item.Text, capturingRegex),

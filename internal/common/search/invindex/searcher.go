@@ -58,11 +58,11 @@ func (s *invertedIndexSearcher[T]) Add(item T, text string) {
 	}
 }
 
-func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp search.ItemCmp[T], filter search.ItemFilter[T]) []search.SearchResult[T] {
+func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp search.ItemCmp[T], filter search.ItemFilter[T]) []search.Result[T] {
 	set := newItemInfoSet()
 	for i, r := range query {
 		if set.IsEmpty() {
-			return []search.SearchResult[T]{}
+			return []search.Result[T]{}
 		}
 		if i+utf8.RuneLen(r) == len(query) && isHangul(r) { // 마지막 글자가 한글일 경우
 			if !hasBatchim(r) { // 받침이 없다면 단순 부분 매칭,
@@ -140,12 +140,12 @@ func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp search.Ite
 	}
 	slices.SortFunc(h.items, itemCmp)
 
-	result := make([]search.SearchResult[T], size)
+	result := make([]search.Result[T], size)
 	for i, info := range h.items {
 		if i == size {
 			break
 		}
-		result[i] = search.SearchResult[T]{
+		result[i] = search.Result[T]{
 			Item:      s.items[info.index],
 			Text:      s.texts[info.index],
 			Highlight: getHighlightByInfo(s.texts[info.index], info.positions),
