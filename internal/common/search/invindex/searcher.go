@@ -9,14 +9,14 @@ import (
 	"unicode/utf8"
 )
 
-// itemInfo 아이템의 items 내 인덱스와 매칭된 문자의 item text 내 position을 저장합니다.
-type itemInfo struct {
+// indexPosition 아이템의 items 내 인덱스와 매칭된 문자의 item text 내 position을 저장합니다.
+type indexPosition struct {
 	index    int // items 내 인덱스
 	position int // 매칭된 문자의 item text 내 position
 }
 
-// extendedItemInfo 아이템의 items 내 인덱스와 매칭된 모든 문자의 item text 내 위치들을 저장합니다.
-type extendedItemInfo struct {
+// indexPositions 아이템의 items 내 인덱스와 매칭된 모든 문자의 item text 내 위치들을 저장합니다.
+type indexPositions struct {
 	index     int   // items 내 인덱스
 	positions []int // 매칭된 모든 문자의 item text 내 position 목록
 }
@@ -24,17 +24,17 @@ type extendedItemInfo struct {
 // invertedIndexSearcher 아이템 목록에서 regexp를 사용해 검색합니다.
 type invertedIndexSearcher[T any] struct {
 	items           []T
-	texts           []string            // 각 아이템의 text 목록
-	invIndex        map[rune][]itemInfo // Full 문자 inverted index
-	partialInvIndex map[rune][]itemInfo // 부분 inverted index, 한글 글자를 순차적으로 분리해서 저장
+	texts           []string                 // 각 아이템의 text 목록
+	invIndex        map[rune][]indexPosition // Full 문자 inverted index
+	partialInvIndex map[rune][]indexPosition // 부분 inverted index, 한글 글자를 순차적으로 분리해서 저장
 }
 
 func NewSearcher[T any](cap int) search.Searcher[T] {
 	return &invertedIndexSearcher[T]{
 		items:           make([]T, 0, cap),
 		texts:           make([]string, 0, cap),
-		invIndex:        make(map[rune][]itemInfo),
-		partialInvIndex: make(map[rune][]itemInfo),
+		invIndex:        make(map[rune][]indexPosition),
+		partialInvIndex: make(map[rune][]indexPosition),
 	}
 }
 
@@ -59,7 +59,7 @@ func (s *invertedIndexSearcher[T]) Add(item T, text string) {
 }
 
 func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp search.ItemCmp[T], filter search.ItemFilter[T]) []search.Result[T] {
-	set := newItemInfoSet()
+	set := newIndexPositionSet()
 	for i, r := range query {
 		if set.IsEmpty() {
 			return []search.Result[T]{}
@@ -119,7 +119,7 @@ func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp search.Ite
 
 	size = min(len(infos), size)
 
-	itemCmp := func(a, b extendedItemInfo) int {
+	itemCmp := func(a, b indexPositions) int {
 		// 첫 매치 위치가 빠른 결과 우선
 		if a.positions[0] != b.positions[0] {
 			return a.positions[0] - b.positions[0]
@@ -128,7 +128,7 @@ func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp search.Ite
 		return cmp(s.items[a.index], s.items[b.index])
 	}
 
-	h := &Heap{items: make([]extendedItemInfo, 0, size), cmp: itemCmp}
+	h := &indexPositionsHeap{items: make([]indexPositions, 0, size), cmp: itemCmp}
 	heap.Init(h)
 	for _, info := range infos {
 		if h.Len() < size {
@@ -154,16 +154,16 @@ func (s *invertedIndexSearcher[T]) Search(query string, size int, cmp search.Ite
 	return result
 }
 
-type Heap struct {
-	items []extendedItemInfo
-	cmp   func(a, b extendedItemInfo) int
+type indexPositionsHeap struct {
+	items []indexPositions
+	cmp   func(a, b indexPositions) int
 }
 
-func (h *Heap) Len() int           { return len(h.items) }
-func (h *Heap) Less(i, j int) bool { return h.cmp(h.items[i], h.items[j]) > 0 }
-func (h *Heap) Swap(i, j int)      { h.items[i], h.items[j] = h.items[j], h.items[i] }
-func (h *Heap) Push(x any)         { h.items = append(h.items, x.(extendedItemInfo)) }
-func (h *Heap) Pop() any {
+func (h *indexPositionsHeap) Len() int           { return len(h.items) }
+func (h *indexPositionsHeap) Less(i, j int) bool { return h.cmp(h.items[i], h.items[j]) > 0 }
+func (h *indexPositionsHeap) Swap(i, j int)      { h.items[i], h.items[j] = h.items[j], h.items[i] }
+func (h *indexPositionsHeap) Push(x any)         { h.items = append(h.items, x.(indexPositions)) }
+func (h *indexPositionsHeap) Pop() any {
 	n := len(h.items)
 	val := h.items[n-1]
 	h.items = h.items[:n-1]
@@ -173,18 +173,18 @@ func (h *Heap) Pop() any {
 func (s *invertedIndexSearcher[T]) addFullRuneToIndex(r rune, index int, position int) {
 	info, exists := s.invIndex[r]
 	if !exists {
-		info = make([]itemInfo, 0)
+		info = make([]indexPosition, 0)
 	}
-	info = append(info, itemInfo{index, position})
+	info = append(info, indexPosition{index, position})
 	s.invIndex[r] = info
 }
 
 func (s *invertedIndexSearcher[T]) addPartialRuneToIndex(r rune, index int, position int) {
 	info, exists := s.partialInvIndex[r]
 	if !exists {
-		info = make([]itemInfo, 0)
+		info = make([]indexPosition, 0)
 	}
-	info = append(info, itemInfo{index, position})
+	info = append(info, indexPosition{index, position})
 	s.partialInvIndex[r] = info
 }
 

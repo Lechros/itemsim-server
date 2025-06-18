@@ -5,16 +5,16 @@ import (
 	"iter"
 )
 
-type ItemInfoSet struct {
-	data []extendedItemInfo // 실제로 Intersect 가 수행된 이후에는 data 에 저장된다.
-	temp []itemInfo         // 첫 Intersect 인 경우 other 를 그대로 가져온다.
+type indexPositionSet struct {
+	data []indexPositions // 실제로 Intersect 가 수행된 이후에는 data 에 저장된다.
+	temp []indexPosition  // 첫 Intersect 인 경우 other 를 그대로 가져온다.
 }
 
-func newItemInfoSet() *ItemInfoSet {
-	return &ItemInfoSet{nil, nil}
+func newIndexPositionSet() *indexPositionSet {
+	return &indexPositionSet{nil, nil}
 }
 
-func (s *ItemInfoSet) IsEmpty() bool {
+func (s *indexPositionSet) IsEmpty() bool {
 	if s.data != nil {
 		return len(s.data) == 0
 	}
@@ -24,15 +24,15 @@ func (s *ItemInfoSet) IsEmpty() bool {
 	return false
 }
 
-func (s *ItemInfoSet) Infos() []extendedItemInfo {
+func (s *indexPositionSet) Infos() []indexPositions {
 	if s.data != nil {
 		return s.data
 	} else if s.temp != nil {
-		result := make([]extendedItemInfo, 0, len(s.temp))
+		result := make([]indexPositions, 0, len(s.temp))
 		lastIndex := -1
 		for _, item := range s.temp {
 			if item.index > lastIndex {
-				result = append(result, extendedItemInfo{
+				result = append(result, indexPositions{
 					index:     item.index,
 					positions: []int{item.position},
 				})
@@ -41,13 +41,13 @@ func (s *ItemInfoSet) Infos() []extendedItemInfo {
 		}
 		return result
 	} else {
-		return []extendedItemInfo{}
+		return []indexPositions{}
 	}
 }
 
-func (s *ItemInfoSet) Intersect(other []itemInfo) {
+func (s *indexPositionSet) Intersect(other []indexPosition) {
 	if other == nil {
-		s.data = []extendedItemInfo{}
+		s.data = []indexPositions{}
 	} else if s.data != nil {
 		s.data = intersectExisting(s.data, s.data, other)
 	} else if s.temp != nil {
@@ -58,12 +58,12 @@ func (s *ItemInfoSet) Intersect(other []itemInfo) {
 	}
 }
 
-func (s *ItemInfoSet) Intersection(other []itemInfo) *ItemInfoSet {
-	result := newItemInfoSet()
+func (s *indexPositionSet) Intersection(other []indexPosition) *indexPositionSet {
+	result := newIndexPositionSet()
 	if other == nil {
-		result.data = []extendedItemInfo{}
+		result.data = []indexPositions{}
 	} else if s.data != nil {
-		result.data = intersectExisting(make([]extendedItemInfo, min(len(s.data), len(other))), s.data, other)
+		result.data = intersectExisting(make([]indexPositions, min(len(s.data), len(other))), s.data, other)
 	} else if s.temp != nil {
 		result.data = intersectNew(s.temp, other)
 	} else {
@@ -72,9 +72,9 @@ func (s *ItemInfoSet) Intersection(other []itemInfo) *ItemInfoSet {
 	return result
 }
 
-func Union(sets ...*ItemInfoSet) *ItemInfoSet {
-	sequence := func(sets *ItemInfoSet) iter.Seq2[extendedItemInfo, error] {
-		return func(yield func(extendedItemInfo, error) bool) {
+func Union(sets ...*indexPositionSet) *indexPositionSet {
+	sequence := func(sets *indexPositionSet) iter.Seq2[indexPositions, error] {
+		return func(yield func(indexPositions, error) bool) {
 			for _, item := range sets.Infos() {
 				if !yield(item, nil) {
 					return
@@ -82,33 +82,33 @@ func Union(sets ...*ItemInfoSet) *ItemInfoSet {
 			}
 		}
 	}
-	cmp := func(a, b extendedItemInfo) int {
+	cmp := func(a, b indexPositions) int {
 		if a.index != b.index {
 			return a.index - b.index
 		}
 		return a.positions[len(a.positions)-1] - b.positions[len(b.positions)-1]
 	}
-	seqs := make([]iter.Seq2[extendedItemInfo, error], len(sets))
+	seqs := make([]iter.Seq2[indexPositions, error], len(sets))
 	for i, item := range sets {
 		seqs[i] = sequence(item)
 	}
-	result := make([]extendedItemInfo, 0)
+	result := make([]indexPositions, 0)
 	for e := range kway.MergeFunc(cmp, seqs...) {
 		if len(result) == 0 || e.index != result[len(result)-1].index {
 			result = append(result, e)
 		}
 	}
-	return &ItemInfoSet{result, nil}
+	return &indexPositionSet{result, nil}
 }
 
-func intersectNew(cur, next []itemInfo) []extendedItemInfo {
+func intersectNew(cur, next []indexPosition) []indexPositions {
 	if len(cur) == 0 {
-		return []extendedItemInfo{}
+		return []indexPositions{}
 	}
 	if len(next) == 0 {
-		return []extendedItemInfo{}
+		return []indexPositions{}
 	}
-	buf := make([]extendedItemInfo, min(len(cur), len(next)))
+	buf := make([]indexPositions, min(len(cur), len(next)))
 	bi := 0
 	ci := 0
 	ni := 0
@@ -119,7 +119,7 @@ func intersectNew(cur, next []itemInfo) []extendedItemInfo {
 				ni++
 			}
 			if ni < len(next) && next[ni].index == index && cur[ci].position < next[ni].position {
-				buf[bi] = extendedItemInfo{
+				buf[bi] = indexPositions{
 					index:     index,
 					positions: []int{cur[ci].position, next[ni].position},
 				}
@@ -140,12 +140,12 @@ func intersectNew(cur, next []itemInfo) []extendedItemInfo {
 	return buf[:bi]
 }
 
-func intersectExisting(buf []extendedItemInfo, cur []extendedItemInfo, next []itemInfo) []extendedItemInfo {
+func intersectExisting(buf []indexPositions, cur []indexPositions, next []indexPosition) []indexPositions {
 	if len(cur) == 0 {
-		return []extendedItemInfo{}
+		return []indexPositions{}
 	}
 	if len(next) == 0 {
-		return []extendedItemInfo{}
+		return []indexPositions{}
 	}
 	bi := 0
 	ci := 0
@@ -157,7 +157,7 @@ func intersectExisting(buf []extendedItemInfo, cur []extendedItemInfo, next []it
 				ni++
 			}
 			if ni < len(next) && next[ni].index == index && cur[ci].positions[len(cur[ci].positions)-1] < next[ni].position {
-				buf[bi] = extendedItemInfo{
+				buf[bi] = indexPositions{
 					index:     index,
 					positions: append(cur[ci].positions, next[ni].position),
 				}
