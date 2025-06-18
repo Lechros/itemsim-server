@@ -1,4 +1,4 @@
-package search
+package invindex
 
 import (
 	"reflect"

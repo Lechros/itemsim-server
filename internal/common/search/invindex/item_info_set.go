@@ -1,14 +1,9 @@
-package search
+package invindex
 
 import (
 	"github.com/achille-roussel/kway-go"
 	"iter"
 )
-
-type extendedItemInfo struct {
-	index     int
-	positions []int
-}
 
 type ItemInfoSet struct {
 	data []extendedItemInfo // 실제로 Intersect 가 수행된 이후에는 data 에 저장된다.

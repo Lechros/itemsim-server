@@ -1,8 +1,9 @@
-package search
+package regex
 
 import (
 	"github.com/BurntSushi/rure-go"
 	"github.com/Lechros/hangul_regexp"
+	"itemsim-server/internal/common/search"
 	"slices"
 	"strings"
 )
@@ -21,7 +22,7 @@ type regexSearcher[T any] struct {
 	offsets []int           // 각 아이템 text의 text 내에서의 인덱스
 }
 
-func NewRegexSearcher[T any](cap int) Searcher[T] {
+func NewSearcher[T any](cap int) search.Searcher[T] {
 	return &regexSearcher[T]{
 		items:   make([]T, 0, cap),
 		builder: strings.Builder{},
@@ -38,7 +39,7 @@ func (s *regexSearcher[T]) Add(item T, text string) {
 	s.builder.WriteRune('\n')
 }
 
-func (s *regexSearcher[T]) Search(query string, size int, cmp ItemCmp[T], filter ItemFilter[T]) []SearchResult[T] {
+func (s *regexSearcher[T]) Search(query string, size int, cmp search.ItemCmp[T], filter search.ItemFilter[T]) []search.SearchResult[T] {
 	matched := make([]matchResult[T], 0) // 매치된 아이템 인덱스 목록
 
 	regex := getNonCapturingRegex(query)
@@ -79,14 +80,14 @@ func (s *regexSearcher[T]) Search(query string, size int, cmp ItemCmp[T], filter
 	})
 
 	size = min(len(matched), size)
-	result := make([]SearchResult[T], size)
+	result := make([]search.SearchResult[T], size)
 
 	capturingRegex := getCapturingRegex(query)
 	for i, item := range matched {
 		if i == size {
 			break
 		}
-		result[i] = SearchResult[T]{
+		result[i] = search.SearchResult[T]{
 			Item:      item.Item,
 			Text:      item.Text,
 			Highlight: getHighlight(item.Text, capturingRegex),

@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"itemsim-server/internal/application"
-	"itemsim-server/internal/common/search"
+	"itemsim-server/internal/common/search/invindex"
 	"itemsim-server/internal/config"
 	"itemsim-server/internal/domain/gear"
 	"itemsim-server/internal/infrastructure/repository/inmemory"
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	//gearSearcher := search.NewRegexSearcher[gear.Gear](gearRepository.Count())
-	gearSearcher := search.NewInvertedIndexSearcher[gear.Gear](gearRepository.Count())
+	gearSearcher := invindex.NewSearcher[gear.Gear](gearRepository.Count())
 
 	gearService := application.NewGearService(gearRepository, gearSearcher)
 	itemService := application.NewItemService(itemRepository)
