@@ -22,17 +22,17 @@ type itemStart[T any] struct {
 // invertedIndexSearcher 아이템 목록에서 regexp를 사용해 검색합니다.
 type invertedIndexSearcher[T any] struct {
 	items   []T
-	texts   []string            // 각 아이템의 text 목록
-	iindex  map[rune][]itemInfo // Full 문자 inverted index
-	piindex map[rune][]itemInfo // 부분 inverted index, 한글 글자를 순차적으로 분리해서 저장
+	texts   []string                    // 각 아이템의 text 목록
+	iindex  map[rune][]extendedItemInfo // Full 문자 inverted index
+	piindex map[rune][]extendedItemInfo // 부분 inverted index, 한글 글자를 순차적으로 분리해서 저장
 }
 
 func NewInvertedIndexSearcher[T any](cap int) Searcher[T] {
 	return &invertedIndexSearcher[T]{
 		items:   make([]T, 0, cap),
 		texts:   make([]string, 0, cap),
-		iindex:  make(map[rune][]itemInfo),
-		piindex: make(map[rune][]itemInfo),
+		iindex:  make(map[rune][]extendedItemInfo),
+		piindex: make(map[rune][]extendedItemInfo),
 	}
 }
 
@@ -169,21 +169,33 @@ func (h *Heap) Pop() any {
 }
 
 func (s *invertedIndexSearcher[T]) addFullRuneToIndex(r rune, index int, position int) {
-	info, exists := s.iindex[r]
+	infos, exists := s.iindex[r]
 	if !exists {
-		info = make([]itemInfo, 0)
+		infos = make([]extendedItemInfo, 0)
 	}
-	info = append(info, itemInfo{index, position})
-	s.iindex[r] = info
+	if len(infos) == 0 {
+		infos = append(infos, extendedItemInfo{index, []int{position}})
+	} else if infos[len(infos)-1].index == index {
+		infos[len(infos)-1].positions = append(infos[len(infos)-1].positions, position)
+	} else {
+		infos = append(infos, extendedItemInfo{index, []int{position}})
+	}
+	s.iindex[r] = infos
 }
 
 func (s *invertedIndexSearcher[T]) addPartialRuneToIndex(r rune, index int, position int) {
-	info, exists := s.piindex[r]
+	infos, exists := s.piindex[r]
 	if !exists {
-		info = make([]itemInfo, 0)
+		infos = make([]extendedItemInfo, 0)
 	}
-	info = append(info, itemInfo{index, position})
-	s.piindex[r] = info
+	if len(infos) == 0 {
+		infos = append(infos, extendedItemInfo{index, []int{position}})
+	} else if infos[len(infos)-1].index == index {
+		infos[len(infos)-1].positions = append(infos[len(infos)-1].positions, position)
+	} else {
+		infos = append(infos, extendedItemInfo{index, []int{position}})
+	}
+	s.piindex[r] = infos
 }
 
 func getHangulRunesForIIndex(hangul rune) []rune {

@@ -456,9 +456,9 @@ func Test_intersectExisting(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := make([]extendedItemInfo, min(len(tt.cur), len(tt.next)))
-			got := intersectExisting(buf, tt.cur, tt.next)
+			got := intersectInPlace(buf, tt.cur, tt.next)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("intersectExisting() = %v, want %v", got, tt.want)
+				t.Errorf("intersectInPlace() = %v, want %v", got, tt.want)
 			}
 		})
 	}
