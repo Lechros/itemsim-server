@@ -2,6 +2,8 @@ github.com/BurntSushi/rure-go v0.0.0-20231211185014-8a0f52724b91 h1:GSI0gOUCu6Ie
 github.com/BurntSushi/rure-go v0.0.0-20231211185014-8a0f52724b91/go.mod h1:UyZ+K/YviirPnAr27NCwqBck0eUipQr68JZSemOXQ1k=
 github.com/Lechros/hangul_regexp v0.2.0 h1:y++mCNFwdBkQ6mS6ec1uS+QddjwIEfOAox/UBL4vWK0=
 github.com/Lechros/hangul_regexp v0.2.0/go.mod h1:oJGuy3+/S+jhRtxrkohXUfF/zJL4ti7sluWh1e8v+D8=
+github.com/achille-roussel/kway-go v1.0.1 h1:nEYMoiODUzdNr8JLQ+z+R6tMdx07AOwMO+a0HuaYf48=
+github.com/achille-roussel/kway-go v1.0.1/go.mod h1:782CZIDvpwAMIcSgElDo7sxy9Bp/Vd/vwHJ8982lQnA=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
