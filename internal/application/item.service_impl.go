@@ -22,3 +22,8 @@ func (s *itemServiceImpl) GetIconRawOriginById(id string) ([2]int, error) {
 	}
 	return origin, nil
 }
+
+func (s *itemServiceImpl) GetAllIconRawOriginsById(ids []string) ([][2]int, error) {
+	data := s.itemRepository.FindAllIconRawOriginsById(ids)
+	return data, nil
+}

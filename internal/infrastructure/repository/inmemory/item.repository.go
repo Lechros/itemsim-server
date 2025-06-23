@@ -26,3 +26,14 @@ func (r *itemRepository) FindIconRawOriginById(id string) ([2]int, bool) {
 	origin, ok := r.iconRawOriginMap[id]
 	return origin, ok
 }
+
+func (r *itemRepository) FindAllIconRawOriginsById(ids []string) [][2]int {
+	result := make([][2]int, len(ids))
+	for i, id := range ids {
+		origin, found := r.iconRawOriginMap[id]
+		if found {
+			result[i] = origin
+		}
+	}
+	return result
+}
