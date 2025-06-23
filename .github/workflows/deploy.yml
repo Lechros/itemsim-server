@@ -34,11 +34,11 @@ jobs:
 
       - name: Build and push Docker image
         id: build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${IMAGE_NAME}
+          tags: ${{ env.IMAGE_NAME }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -50,8 +50,10 @@ jobs:
           ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
 
       - name: Transfer docker-compose.yml
+        env:
+          IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
         run: |
-          IMAGE_REF='${IMAGE_NAME}@${{ steps.build.outputs.digest }}' envsubst 'IMAGE_REF' < scripts/docker-compose.yml > /tmp/docker-compose.yml
+          envsubst '$IMAGE_REF' < scripts/docker-compose.yml > /tmp/docker-compose.yml
           scp -i ~/.ssh/deploy_key /tmp/docker-compose.yml "$DEPLOY_USER@$DEPLOY_HOST:/tmp/docker-compose.yml"
 
       - name: Run docker stack
