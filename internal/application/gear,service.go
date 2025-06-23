@@ -8,6 +8,8 @@ type GearService interface {
 	GetAllDataById(ids []int) ([]map[string]interface{}, error)
 
 	GetIconOriginById(id int) ([2]int, error)
+
+	GetAllIconOriginsById(ids []int) ([][2]int, error)
 }
 
 type GearSearchResult struct {

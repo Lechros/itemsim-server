@@ -32,8 +32,10 @@ func registerGearRoutes(group *echo.Group, h *GearHandler, cacheClient *cache.Cl
 	group.GET("", h.GetAllData)
 	group.GET("/:id", h.GetData)
 	group.GET("/:id/icon/origin", h.GetIconOrigin)
+	group.GET("/icon/origins", h.GetAllIconOrigins)
 }
 
 func registerItemRoutes(group *echo.Group, h *ItemHandler) {
 	group.GET("/:id/raw-icon/origin", h.GetIconRawOrigin)
+	group.GET("/raw-icon/origins", h.GetAllIconRawOrigins)
 }
