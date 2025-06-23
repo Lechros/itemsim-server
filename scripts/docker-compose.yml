@@ -3,8 +3,7 @@ version: '3.8'
 services:
   itemsim-server:
     image: ${IMAGE_REF}
-    environment:
-      METRICS_PASSWORD: ${METRICS_PASSWORD}
+    env_file: "$HOME/.env"
     ports:
       - "80:1323"
     deploy:
