@@ -31,7 +31,7 @@ func main() {
 		MaxAge:       86400,
 	}))
 	// Prometheus
-	e.Use(echoprometheus.NewMiddleware("itemsim"))
+	e.Use(echoprometheus.NewMiddleware("echo"))
 
 	// Initialize configuration
 	cfg := config.NewConfig()
