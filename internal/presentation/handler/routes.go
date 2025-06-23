@@ -3,9 +3,9 @@ package handler
 import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	cache "github.com/victorspringer/http-cache"
 	"itemsim-server/internal/config"
+	"itemsim-server/internal/presentation/middleware"
 )
 
 func RegisterRoutes(e *echo.Echo,
@@ -22,9 +22,7 @@ func RegisterRoutes(e *echo.Echo,
 
 func registerSystemRoutes(e *echo.Echo, h *SystemHandler, cfg *config.Config) {
 	e.GET("/health", h.Healthcheck)
-	e.GET("/metrics", echoprometheus.NewHandler(), middleware.KeyAuth(func(key string, c echo.Context) (bool, error) {
-		return key == cfg.MetricsPassword, nil
-	}))
+	e.GET("/metrics", echoprometheus.NewHandler(), middleware.BearerAuth(cfg.MetricsPassword))
 }
 
 func registerGearRoutes(group *echo.Group, h *GearHandler, cacheClient *cache.Client) {
