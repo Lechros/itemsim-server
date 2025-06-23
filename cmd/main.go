@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	cache "github.com/victorspringer/http-cache"
@@ -29,6 +30,8 @@ func main() {
 		AllowMethods: []string{http.MethodGet, http.MethodOptions},
 		MaxAge:       86400,
 	}))
+	// Prometheus
+	e.Use(echoprometheus.NewMiddleware("itemsim"))
 
 	// Initialize configuration
 	cfg := config.NewConfig()
@@ -69,7 +72,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	handler.RegisterRoutes(e, systemHandler, gearHandler, itemHandler, cacheClient)
+	// Register routes
+	handler.RegisterRoutes(e, systemHandler, gearHandler, itemHandler, cfg, cacheClient)
 
 	// Graceful Shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
