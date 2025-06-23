@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  itemsim-server:
+    image: ${IMAGE_REF}
+    environment:
+      METRICS_PASSWORD: ${METRICS_PASSWORD}
+    ports:
+      - "80:1323"
+    deploy:
+      update_config:
+        order: start-first
