@@ -1,19 +1,22 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 )
 
 // Config holds all configuration for the application
 type Config struct {
-	ResourcesPath string
+	ResourcesPath   string
+	MetricsPassword string
 }
 
 // NewConfig creates a new Config with default values
 func NewConfig() *Config {
 	return &Config{
-		ResourcesPath: getEnvOrDefault("RESOURCES_PATH", "resources"),
+		ResourcesPath:   getEnvOrDefault("RESOURCES_PATH", "resources"),
+		MetricsPassword: getEnvOrPanic("METRICS_PASSWORD"),
 	}
 }
 
@@ -28,4 +31,12 @@ func getEnvOrDefault(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+func getEnvOrPanic(key string) string {
+	value, exists := os.LookupEnv(key)
+	if !exists {
+		panic(fmt.Sprintf("env '%s' not found", key))
+	}
+	return value
 }
