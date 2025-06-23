@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 concurrency:
@@ -56,9 +56,8 @@ jobs:
           IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
         run: |
           envsubst '$IMAGE_REF' < scripts/docker-compose.yml > /tmp/docker-compose.yml
-          scp -i ~/.ssh/deploy_key /tmp/docker-compose.yml "$DEPLOY_USER@$DEPLOY_HOST:/tmp/docker-compose.yml"
+          scp -i ~/.ssh/deploy_key /tmp/docker-compose.yml "$DEPLOY_USER@$DEPLOY_HOST:/tmp/docker-compose.yml.tmp"
 
       - name: Run docker stack
-        run : |
-          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
-            "sudo docker stack deploy -c /tmp/docker-compose.yml --with-registry-auth itemsim-server"
+        run: |
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" "envsubst < /tmp/docker-compose.yml.tmp > /tmp/docker-compose.yml && sudo docker stack deploy -c /tmp/docker-compose.yml --with-registry-auth itemsim-server"
