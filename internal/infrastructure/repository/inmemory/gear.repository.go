@@ -70,3 +70,14 @@ func (r *gearRepository) FindIconOriginById(id int) ([2]int, bool) {
 	origin, ok := r.iconOriginMap[id]
 	return origin, ok
 }
+
+func (r *gearRepository) FindAllIconOriginsById(ids []int) [][2]int {
+	result := make([][2]int, len(ids))
+	for i, id := range ids {
+		origin, found := r.iconOriginMap[id]
+		if found {
+			result[i] = origin
+		}
+	}
+	return result
+}

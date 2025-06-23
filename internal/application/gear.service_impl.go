@@ -72,6 +72,11 @@ func (s *gearServiceImpl) GetIconOriginById(id int) ([2]int, error) {
 	return origin, nil
 }
 
+func (s *gearServiceImpl) GetAllIconOriginsById(ids []int) ([][2]int, error) {
+	data := s.gearRepository.FindAllIconOriginsById(ids)
+	return data, nil
+}
+
 func isPrefix(n int, prefix int) bool {
 	for n >= prefix {
 		if n == prefix {

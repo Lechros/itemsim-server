@@ -84,3 +84,24 @@ func (h *GearHandler) GetIconOrigin(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, result)
 }
+
+func (h *GearHandler) GetAllIconOrigins(c echo.Context) error {
+	ids := c.QueryParam("id")
+	if ids == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "ids is required")
+	}
+	idsStrList := strings.Split(ids, ",")
+	idList := make([]int, 0, len(idsStrList))
+	for _, idStr := range idsStrList {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid ids")
+		}
+		idList = append(idList, id)
+	}
+	result, err := h.gearService.GetAllIconOriginsById(idList)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "not found")
+	}
+	return c.JSON(http.StatusOK, result)
+}
