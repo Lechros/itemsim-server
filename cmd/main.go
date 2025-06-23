@@ -8,7 +8,7 @@ import (
 	cache "github.com/victorspringer/http-cache"
 	"github.com/victorspringer/http-cache/adapter/memory"
 	"itemsim-server/internal/application"
-	"itemsim-server/internal/common/search"
+	"itemsim-server/internal/common/search/invindex"
 	"itemsim-server/internal/config"
 	"itemsim-server/internal/domain/gear"
 	"itemsim-server/internal/infrastructure/repository/inmemory"
@@ -47,7 +47,7 @@ func main() {
 		log.Fatalf("Failed to initialize item repository: %v", err)
 	}
 
-	gearSearcher := search.NewSearcher[gear.Gear](gearRepository.Count())
+	gearSearcher := invindex.NewSearcher[gear.Gear](gearRepository.Count())
 
 	gearService := application.NewGearService(gearRepository, gearSearcher)
 	itemService := application.NewItemService(itemRepository)

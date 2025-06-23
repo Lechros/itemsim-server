@@ -1,13 +1,14 @@
-package search
+package regex
 
 import (
 	"fmt"
+	"itemsim-server/internal/common/search"
 	"reflect"
 	"strings"
 	"testing"
 )
 
-func Test_searcherImpl_Search_Count(t *testing.T) {
+func Test_regexSearcher_Search_Count(t *testing.T) {
 	type args struct {
 		query string
 		size  int
@@ -25,7 +26,7 @@ func Test_searcherImpl_Search_Count(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := fixture_searcherImpl()
+			s := fixture_regexSearcher()
 			if got := s.Search(tt.args.query, tt.args.size, strings.Compare, nil); !reflect.DeepEqual(len(got), tt.wantCount) {
 				t.Errorf("len(Search()) = %v, wantCount %v", len(got), tt.wantCount)
 			}
@@ -33,7 +34,7 @@ func Test_searcherImpl_Search_Count(t *testing.T) {
 	}
 }
 
-func Test_searcherImpl_Search_Sort(t *testing.T) {
+func Test_regexSearcher_Search_Sort(t *testing.T) {
 	type args struct {
 		query string
 		size  int
@@ -54,7 +55,7 @@ func Test_searcherImpl_Search_Sort(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := fixture_searcherImpl()
+			s := fixture_regexSearcher()
 			if got := s.Search(tt.args.query, tt.args.size, cmp, nil); !reflect.DeepEqual(got[0].Text, tt.wantFirstText) {
 				t.Errorf("Search() = %v, wantFirstText %v", got, tt.wantFirstText)
 			}
@@ -62,7 +63,7 @@ func Test_searcherImpl_Search_Sort(t *testing.T) {
 	}
 }
 
-func Test_searcherImpl_Search_Highlight(t *testing.T) {
+func Test_regexSearcher_Search_Highlight(t *testing.T) {
 	type args struct {
 		query string
 		size  int
@@ -78,7 +79,7 @@ func Test_searcherImpl_Search_Highlight(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := fixture_searcherImpl()
+			s := fixture_regexSearcher()
 			if got := s.Search(tt.args.query, tt.args.size, strings.Compare, nil); !reflect.DeepEqual(got[0].Highlight, tt.wantFirstHighlight) {
 				t.Errorf("Search() = %v, wantFirstHighlight %v", got, tt.wantFirstHighlight)
 			}
@@ -86,7 +87,7 @@ func Test_searcherImpl_Search_Highlight(t *testing.T) {
 	}
 }
 
-func fixture_searcherImpl() Searcher[string] {
+func fixture_regexSearcher() search.Searcher[string] {
 	searcher := NewSearcher[string](100)
 	for _, prefix := range [...]string{
 		"서명", "청소기", "학생", "아르바이트", "손", "삼겹살", "주머니", "파일럿", "양", "김연아",
