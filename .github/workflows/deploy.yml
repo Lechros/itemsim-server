@@ -61,4 +61,4 @@ jobs:
       - name: Run docker stack
         run : |
           ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
-            "docker stack deploy -c /tmp/docker-compose.yml --with-registry-auth itemsim-server"
+            "sudo docker stack deploy -c /tmp/docker-compose.yml --with-registry-auth itemsim-server"
