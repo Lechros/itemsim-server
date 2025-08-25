@@ -2,7 +2,7 @@ name: Build and Deploy with Ansible
 
 on:
   push:
-    branches: [ main, ci/ansible ]
+    branches: [ main ]
   workflow_dispatch:
 
 env:
