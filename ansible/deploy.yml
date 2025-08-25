@@ -11,9 +11,15 @@
         state: started
         enabled: yes
         
-    - name: Check Docker Swarm status
+    - name: Initialize Docker Swarm
       docker_swarm:
         state: present
+        advertise_addr: "{{ ansible_host }}"
+
+    - name: Install Python Docker module
+      pip:
+        name: docker
+        executable: pip3
         
     - name: Create deployment directory
       file:
