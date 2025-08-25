@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  {{ app_name }}:
+    image: {{ docker_image_name }}:{{ docker_tag }}
+    env_file: "{{ env_file }}"
+    ports:
+      - "{{ app_port }}:1323"
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
