@@ -19,7 +19,7 @@
 
 !Dockerfile
 !.github/**
-!scripts/**
+!ansible/**
 
 !README.md
 !LICENSE
