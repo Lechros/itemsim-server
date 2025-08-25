@@ -5,6 +5,12 @@
   gather_facts: yes
   
   tasks:
+    - name: Install Python PIP
+      apt:
+        name: python3-pip
+        state: present
+        update_cache: yes
+
     - name: Install Python Docker module
       pip:
         name: docker
