@@ -55,16 +55,16 @@ jobs:
           cd ansible
           ansible-galaxy collection install -r requirements.yml
 
-      - name: Setup SSH
+      - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
           echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
 
       - name: Deploy with Ansible
         env:
           DOCKER_TAG: latest
           DOCKER_DIGEST: ${{ steps.build.outputs.digest }}
         run: |
-          ansible-playbook ansible/deploy.yml
+          cd ansible
+          ansible-playbook -i inventory.yml deploy.yml
