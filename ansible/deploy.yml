@@ -5,40 +5,40 @@
   gather_facts: yes
   
   tasks:
+    - name: Install Python Docker module
+      pip:
+        name: docker
+        executable: pip3
+
     - name: Check Docker service status
       systemd:
         name: docker
         state: started
         enabled: yes
-        
+
     - name: Initialize Docker Swarm
       docker_swarm:
         state: present
         advertise_addr: "{{ ansible_host }}"
 
-    - name: Install Python Docker module
-      pip:
-        name: docker
-        executable: pip3
-        
     - name: Create deployment directory
       file:
         path: "{{ deploy_path }}"
         state: directory
         mode: '0755'
-        
+
     - name: Create docker-compose.yml
       template:
         src: templates/docker-compose.yml.j2
         dest: "{{ deploy_path }}/docker-compose.yml"
         mode: '0644'
-    
+
     - name: Create .env file
       template:
         src: templates/env.j2
         dest: "{{ deploy_path }}/.env"
         mode: '0644'
-        
+
     - name: Deploy with Docker Swarm
       docker_stack:
         name: "{{ app_name }}"
