@@ -13,7 +13,9 @@
 
     - name: Install Python Docker module
       pip:
-        name: docker
+        name:
+          - docker
+          - jsondiff  # for Docker Swarm
         executable: pip3
 
     - name: Check Docker service status
