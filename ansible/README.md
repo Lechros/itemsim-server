@@ -18,8 +18,3 @@ export DOCKER_DIGEST="sha256:..."
 export METRICS_PASSWORD="your-secure-metrics-password"
 export RESOURCES_PATH="resources"
 ```
-
-### 배포 실행
-```bash
-ansible-playbook ansible/deploy.yml
-```
