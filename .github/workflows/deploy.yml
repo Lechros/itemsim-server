@@ -9,7 +9,6 @@ env:
   DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
   DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
   DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-  DEPLOY_KEY_PATH: ~/.ssh/deploy_key
   DOCKER_IMAGE_NAME: ghcr.io/lechros/itemsim-server
   METRICS_PASSWORD: ${{ secrets.METRICS_PASSWORD }}
   RESOURCES_PATH: resources
@@ -59,8 +58,8 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "$DEPLOY_KEY" > $DEPLOY_KEY_PATH
-          chmod 600 $DEPLOY_KEY_PATH
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
 
       - name: Deploy with Ansible

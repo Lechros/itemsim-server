@@ -11,7 +11,7 @@
 ```bash
 export DEPLOY_HOST="your-server-ip"
 export DEPLOY_USER="deploy"
-export DEPLOY_KEY_PATH="~/.ssh/deploy_key"
+export DEPLOY_KEY="ssh-key"
 export DOCKER_IMAGE_NAME="ghcr.io/lechros/itemsim-server"
 export DOCKER_TAG="latest"
 export DOCKER_DIGEST="sha256:..."
