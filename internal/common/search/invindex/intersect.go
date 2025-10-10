@@ -1,8 +1,9 @@
 package invindex
 
 import (
-	"github.com/achille-roussel/kway-go"
 	"iter"
+
+	"github.com/achille-roussel/kway-go"
 )
 
 type indexPositionSet struct {
