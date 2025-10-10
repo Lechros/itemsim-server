@@ -15,6 +15,7 @@ func RegisterRoutes(e *echo.Echo,
 	itemHandler *ItemHandler,
 	setItemHandler *SetItemHandler,
 	exclusiveEquipHandler *ExclusiveEquipHandler,
+	soulHandler *SoulHandler,
 	cfg *config.Config,
 	cacheClient *cache.Client,
 ) {
@@ -23,6 +24,7 @@ func RegisterRoutes(e *echo.Echo,
 	registerItemRoutes(e.Group("/items"), itemHandler)
 	registerSetItemRoutes(e.Group("/set-items"), setItemHandler, cacheClient)
 	registerExclusiveEquipRoutes(e.Group("/exclusive-equips"), exclusiveEquipHandler, cacheClient)
+	registerSoulRoutes(e.Group("/souls"), soulHandler, cacheClient)
 }
 
 func registerSystemRoutes(e *echo.Echo, h *SystemHandler, cfg *config.Config) {
@@ -48,5 +50,9 @@ func registerSetItemRoutes(group *echo.Group, h *SetItemHandler, cacheClient *ca
 }
 
 func registerExclusiveEquipRoutes(group *echo.Group, h *ExclusiveEquipHandler, cacheClient *cache.Client) {
+	group.GET("", h.GetAllDataAsJson, echo.WrapMiddleware(cacheClient.Middleware))
+}
+
+func registerSoulRoutes(group *echo.Group, h *SoulHandler, cacheClient *cache.Client) {
 	group.GET("", h.GetAllDataAsJson, echo.WrapMiddleware(cacheClient.Middleware))
 }

@@ -58,18 +58,25 @@ func main() {
 		log.Fatalf("Failed to initialize exclusive equip repository: %v", err)
 	}
 
+	soulRepository, err := inmemory.NewSoulRepository(cfg)
+	if err != nil {
+		log.Fatalf("Failed to initialize soul repository: %v", err)
+	}
+
 	gearSearcher := invindex.NewSearcher[gear.Gear](gearRepository.Count())
 
 	gearService := application.NewGearService(gearRepository, gearSearcher)
 	itemService := application.NewItemService(itemRepository)
 	setItemService := application.NewSetItemService(setItemRepository)
 	exclusiveEquipService := application.NewExclusiveEquipService(exclusiveEquipRepository)
+	soulService := application.NewSoulService(soulRepository)
 
 	systemHandler := handler.NewSystemHandler()
 	gearHandler := handler.NewGearHandler(gearService)
 	itemHandler := handler.NewItemHandler(itemService)
 	setItemHandler := handler.NewSetItemHandler(setItemService)
 	exclusiveEquipHandler := handler.NewExclusiveEquipHandler(exclusiveEquipService)
+	soulHandler := handler.NewSoulHandler(soulService)
 
 	// Setup response cache
 	memcached, err := memory.NewAdapter(
@@ -88,7 +95,7 @@ func main() {
 	}
 
 	// Register routes
-	handler.RegisterRoutes(e, systemHandler, gearHandler, itemHandler, setItemHandler, exclusiveEquipHandler, cfg, cacheClient)
+	handler.RegisterRoutes(e, systemHandler, gearHandler, itemHandler, setItemHandler, exclusiveEquipHandler, soulHandler, cfg, cacheClient)
 
 	// Graceful Shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
