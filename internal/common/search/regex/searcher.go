@@ -1,11 +1,12 @@
 package regex
 
 import (
-	"github.com/BurntSushi/rure-go"
-	"github.com/Lechros/hangul_regexp"
 	"itemsim-server/internal/common/search"
 	"slices"
 	"strings"
+
+	"github.com/BurntSushi/rure-go"
+	"github.com/Lechros/hangul_regexp"
 )
 
 type matchResult[T any] struct {
