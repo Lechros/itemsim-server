@@ -45,16 +45,20 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.9'
-          cache: 'pip'
+          python-version-file: "ansible/pyproject.toml"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
 
       - name: Install Ansible
-        run: pip install ansible
+        working-directory: ansible
+        run: uv sync --locked
 
       - name: Install Ansible collections
-        run: |
-          cd ansible
-          ansible-galaxy collection install -r requirements.yml
+        working-directory: ansible
+        run: ansible-galaxy collection install -r requirements.yml
 
       - name: Setup SSH Key
         run: |
@@ -66,8 +70,8 @@ jobs:
         env:
           DOCKER_TAG: latest
           DOCKER_DIGEST: ${{ steps.build.outputs.digest }}
+        working-directory: ansible
         run: |
-          cd ansible
           ansible-playbook -i "$DEPLOY_HOSTS" -i inventory.yml \
             --user "$DEPLOY_USER" \
             deploy.yml
