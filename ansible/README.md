@@ -9,7 +9,7 @@
 
 ### 환경 변수 설정
 ```bash
-export DEPLOY_HOST="your-server-ip"
+export DEPLOY_HOSTS="your-server-ip-1,your-server-ip-2"
 export DEPLOY_USER="deploy"
 export DEPLOY_KEY="ssh-key"
 export DOCKER_IMAGE_NAME="ghcr.io/lechros/itemsim-server"
