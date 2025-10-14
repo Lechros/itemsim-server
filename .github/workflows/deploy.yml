@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+  DEPLOY_HOSTS: ${{ secrets.DEPLOY_HOSTS }}
   DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
   DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
   DOCKER_IMAGE_NAME: ghcr.io/lechros/itemsim-server
