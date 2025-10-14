@@ -1,9 +1,4 @@
 all:
-  hosts:
-    itemsim-server:
-      ansible_host: "{{ lookup('env', 'DEPLOY_HOST', default=Undefined) }}"
-      ansible_user: "{{ lookup('env', 'DEPLOY_USER', default=Undefined) }}"
-      ansible_ssh_private_key_file: ~/.ssh/deploy_key
   vars:
     app_name: itemsim-server
     app_port: 80
