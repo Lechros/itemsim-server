@@ -16,11 +16,11 @@ func NewGearRepository(config *config.Config) (gear.Repository, error) {
 	dataMap := map[int]map[string]interface{}{}
 	iconOriginMap := map[int][2]int{}
 
-	if err := file.ReadJson(config.GetFilePath("gear-data.json"), &dataMap); err != nil {
+	if err := file.ReadJson(config.GetFilePath("gear.json"), &dataMap); err != nil {
 		return nil, err
 	}
 
-	if err := file.ReadJson(config.GetFilePath("gear-origin.json"), &iconOriginMap); err != nil {
+	if err := file.ReadJson(config.GetFilePath("gear-icon-origin.json"), &iconOriginMap); err != nil {
 		return nil, err
 	}
 

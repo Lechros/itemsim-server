@@ -13,7 +13,7 @@ type itemRepository struct {
 func NewItemRepository(config *config.Config) (item.Repository, error) {
 	iconRawOriginMap := map[string][2]int{}
 
-	if err := file.ReadJson(config.GetFilePath("item-raw-origin.json"), &iconRawOriginMap); err != nil {
+	if err := file.ReadJson(config.GetFilePath("item-raw-icon-origin.json"), &iconRawOriginMap); err != nil {
 		return nil, err
 	}
 
