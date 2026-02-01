@@ -1,6 +1,9 @@
 package inmemory
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"itemsim-server/internal/config"
 	"itemsim-server/internal/domain/gear"
@@ -9,11 +12,13 @@ import (
 
 type gearRepository struct {
 	dataMap       map[int]map[string]interface{}
+	dataHashMap   map[int]string
 	iconOriginMap map[int][2]int
 }
 
 func NewGearRepository(config *config.Config) (gear.Repository, error) {
 	dataMap := map[int]map[string]interface{}{}
+	dataHashMap := map[int]string{}
 	iconOriginMap := map[int][2]int{}
 
 	if err := file.ReadJson(config.GetFilePath("gear.json"), &dataMap); err != nil {
@@ -24,8 +29,18 @@ func NewGearRepository(config *config.Config) (gear.Repository, error) {
 		return nil, err
 	}
 
+	for id, data := range dataMap {
+		b, err := json.Marshal(data)
+		if err != nil {
+			return nil, err
+		}
+		hash := sha256.Sum256(b)
+		dataHashMap[id] = hex.EncodeToString(hash[:])
+	}
+
 	return &gearRepository{
 		dataMap:       dataMap,
+		dataHashMap:   dataHashMap,
 		iconOriginMap: iconOriginMap,
 	}, nil
 }
@@ -58,6 +73,23 @@ func (r *gearRepository) FindAllDataById(ids []int) ([]map[string]interface{}, e
 	var result = make([]map[string]interface{}, len(ids))
 	for i, id := range ids {
 		data, found := r.dataMap[id]
+		if !found {
+			return nil, errors.New("not found")
+		}
+		result[i] = data
+	}
+	return result, nil
+}
+
+func (r *gearRepository) FindHashById(id int) (string, bool) {
+	data, ok := r.dataHashMap[id]
+	return data, ok
+}
+
+func (r *gearRepository) FindAllHashesById(ids []int) ([]string, error) {
+	var result = make([]string, len(ids))
+	for i, id := range ids {
+		data, found := r.dataHashMap[id]
 		if !found {
 			return nil, errors.New("not found")
 		}

@@ -74,6 +74,39 @@ func (h *GearHandler) GetAllData(c echo.Context) error {
 	return c.JSON(http.StatusOK, results)
 }
 
+func (h *GearHandler) GetHash(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
+	}
+	result, err := h.gearService.GetHashById(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "not found")
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (h *GearHandler) GetAllHashes(c echo.Context) error {
+	ids := c.QueryParam("id")
+	if ids == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "ids is required")
+	}
+	idsStrList := strings.Split(ids, ",")
+	idList := make([]int, 0, len(idsStrList))
+	for _, idStr := range idsStrList {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid ids")
+		}
+		idList = append(idList, id)
+	}
+	results, err := h.gearService.GetAllHashesById(idList)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+	}
+	return c.JSON(http.StatusOK, results)
+}
+
 func (h *GearHandler) GetIconOrigin(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
