@@ -35,7 +35,9 @@ func registerSystemRoutes(e *echo.Echo, h *SystemHandler, cfg *config.Config) {
 func registerGearRoutes(group *echo.Group, h *GearHandler, cacheClient *cache.Client) {
 	group.GET("/search", h.Search, echo.WrapMiddleware(cacheClient.Middleware))
 	group.GET("", h.GetAllData)
+	group.GET("/hashes", h.GetAllHashes)
 	group.GET("/:id", h.GetData)
+	group.GET("/:id/hash", h.GetHash)
 	group.GET("/:id/icon/origin", h.GetIconOrigin)
 	group.GET("/icon/origins", h.GetAllIconOrigins)
 }
