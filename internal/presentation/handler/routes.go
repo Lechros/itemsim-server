@@ -56,5 +56,7 @@ func registerExclusiveEquipRoutes(group *echo.Group, h *ExclusiveEquipHandler, c
 }
 
 func registerSoulRoutes(group *echo.Group, h *SoulHandler, cacheClient *cache.Client) {
+	group.GET("/search", h.Search, echo.WrapMiddleware(cacheClient.Middleware))
+	group.GET("/:id", h.GetData)
 	group.GET("", h.GetAllDataAsJson, echo.WrapMiddleware(cacheClient.Middleware))
 }

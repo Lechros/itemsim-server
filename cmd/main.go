@@ -6,6 +6,7 @@ import (
 	"itemsim-server/internal/common/search/invindex"
 	"itemsim-server/internal/config"
 	"itemsim-server/internal/domain/gear"
+	"itemsim-server/internal/domain/soul"
 	"itemsim-server/internal/infrastructure/repository/inmemory"
 	"itemsim-server/internal/presentation/handler"
 	"log"
@@ -64,12 +65,13 @@ func main() {
 	}
 
 	gearSearcher := invindex.NewSearcher[gear.Gear](gearRepository.Count())
+	soulSearcher := invindex.NewSearcher[soul.Soul](soulRepository.Count())
 
 	gearService := application.NewGearService(gearRepository, gearSearcher)
 	itemService := application.NewItemService(itemRepository)
 	setItemService := application.NewSetItemService(setItemRepository)
 	exclusiveEquipService := application.NewExclusiveEquipService(exclusiveEquipRepository)
-	soulService := application.NewSoulService(soulRepository)
+	soulService := application.NewSoulService(soulRepository, soulSearcher)
 
 	systemHandler := handler.NewSystemHandler()
 	gearHandler := handler.NewGearHandler(gearService)
