@@ -31,7 +31,15 @@ func (h *SoulHandler) Search(c echo.Context) error {
 	if query == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "query is required")
 	}
-	results, err := h.soulService.SearchByName(query)
+	var magnificent *bool
+	if value := c.QueryParam("magnificent"); value != "" {
+		parsed, err := strconv.ParseBool(value)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid magnificent")
+		}
+		magnificent = &parsed
+	}
+	results, err := h.soulService.SearchByName(query, magnificent)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

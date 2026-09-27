@@ -29,10 +29,12 @@ func (r *soulRepository) FindAllDataAsJson() any {
 func (r *soulRepository) FindAll() []soul.Soul {
 	souls := make([]soul.Soul, 0, len(r.dataMap))
 	for id, data := range r.dataMap {
+		magnificent, _ := data["magnificent"].(bool)
 		souls = append(souls, soul.Soul{
-			Id:   id,
-			Name: data["name"].(string),
-			Data: data,
+			Id:          id,
+			Name:        data["name"].(string),
+			Magnificent: magnificent,
+			Data:        data,
 		})
 	}
 	return souls

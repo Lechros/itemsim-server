@@ -1,7 +1,7 @@
 package application
 
 type SoulService interface {
-	SearchByName(query string) ([]SoulSearchResult, error)
+	SearchByName(query string, magnificent *bool) ([]SoulSearchResult, error)
 
 	GetDataById(id int) (map[string]interface{}, error)
 

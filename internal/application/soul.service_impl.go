@@ -22,11 +22,17 @@ func NewSoulService(soulRepository soul.Repository, searcher search.Searcher[sou
 	return service
 }
 
-func (s *soulServiceImpl) SearchByName(query string) ([]SoulSearchResult, error) {
+func (s *soulServiceImpl) SearchByName(query string, magnificent *bool) ([]SoulSearchResult, error) {
 	cmp := func(a soul.Soul, b soul.Soul) int {
 		return a.Id - b.Id
 	}
-	searched := s.searcher.Search(query, 100, cmp, nil)
+	var filter search.ItemFilter[soul.Soul]
+	if magnificent != nil {
+		filter = func(item soul.Soul) bool {
+			return item.Magnificent == *magnificent
+		}
+	}
+	searched := s.searcher.Search(query, 100, cmp, filter)
 	results := make([]SoulSearchResult, len(searched))
 	for i, item := range searched {
 		results[i] = SoulSearchResult{
