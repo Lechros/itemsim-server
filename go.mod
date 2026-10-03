@@ -3,7 +3,7 @@ module itemsim-server
 go 1.23.4
 
 require (
-	github.com/achille-roussel/kway-go v1.0.1
+	github.com/achille-roussel/kway-go v1.0.2
 	github.com/labstack/echo-contrib v0.17.4
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/victorspringer/http-cache v0.0.0-20240523143319-7d9f48f8ab91
