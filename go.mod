@@ -6,7 +6,7 @@ require (
 	github.com/achille-roussel/kway-go v1.0.1
 	github.com/labstack/echo-contrib v0.17.4
 	github.com/labstack/echo/v4 v4.13.3
-	github.com/victorspringer/http-cache v0.0.0-20240523143319-7d9f48f8ab91
+	github.com/victorspringer/http-cache v0.0.0-20261007223452-f737c7a8ec81
 )
 
 require (
